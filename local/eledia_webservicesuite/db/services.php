@@ -16,11 +16,11 @@ $functions = array(
 		'type' => 'write',
 		'capabilities' => 'local/eledia_webservicesuite:access, moodle/user:viewdetails',
 	),
-    'elediaservice_get_user_by_idnumber' => array(
+    'elediaservice_get_users_by_idnumber' => array(
 		'classname' => 'eledia_services',
-		'methodname' => 'get_user_by_idnumber',
+		'methodname' => 'get_users_by_idnumber',
 		'classpath' => 'local/eledia_webservicesuite/externallib.php',
-		'description' => 'returns a user object according to the given idnumber',
+		'description' => 'returns a list of users object according to the given idnumbers',
 		'type' => 'write',
 		'capabilities' => 'local/eledia_webservicesuite:access, moodle/user:viewdetails',
 	),
@@ -47,6 +47,22 @@ $functions = array(
 		'description' => 'returns a course object according to the given idnumber',
 		'type' => 'write',
 		'capabilities' => 'local/eledia_webservicesuite:access, moodle/course:view, moodle/course:update, moodle/course:viewhiddencourses',
+	),
+        'elediaservice_update_courses_by_idnumber' => array(
+		'classname' => 'eledia_services',
+		'methodname' => 'update_courses_by_idnumber',
+		'classpath' => 'local/eledia_webservicesuite/externallib.php',
+		'description' => 'updates a course object according to the given idnumber',
+		'type' => 'write',
+		'capabilities' => 'local/eledia_webservicesuite:access, moodle/course:view, moodle/course:update, moodle/course:viewhiddencourses, moodle/course:visibility',
+	),
+    'elediaservice_get_user_by_idnumber' => array(
+		'classname' => 'eledia_services',
+		'methodname' => 'get_user_by_idnumber',
+		'classpath' => 'local/eledia_webservicesuite/externallib.php',
+		'description' => 'returns a list of users object according to the given idnumbers',
+		'type' => 'write',
+		'capabilities' => 'local/eledia_webservicesuite:access, moodle/user:viewdetails',
 	),
 );
 

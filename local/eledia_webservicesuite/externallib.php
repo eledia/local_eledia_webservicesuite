@@ -11,6 +11,22 @@ defined('MOODLE_INTERNAL') || die;
 require_once $CFG->libdir.'/externallib.php';
 
 class eledia_services extends external_api {
+
+    /**
+     * Parameterdefinition for method "get_user_by_mail"
+     *
+     * @return {object} external_function_parameters
+     */
+    public static function get_user_by_mail_parameters() {
+        return new external_function_parameters(
+            array(
+                'mails' => new external_multiple_structure(
+                    new external_value(PARAM_EMAIL, 'mail adress of a user to search for')
+                )
+            )
+        );
+    }
+
     /**
      * Method to get the users with the given mail adresses.
      *
@@ -57,21 +73,6 @@ class eledia_services extends external_api {
         }
         $users->close();
         return $result;
-    }
-
-    /**
-     * Parameterdefinition for method "get_user_by_mail"
-     *
-     * @return {object} external_function_parameters
-     */
-    public static function get_user_by_mail_parameters() {
-        return new external_function_parameters(
-            array(
-                'mails' => new external_multiple_structure(
-                    new external_value(PARAM_EMAIL, 'mail adress of a user to search for')
-                )
-            )
-        );
     }
 
     /**
@@ -149,7 +150,7 @@ class eledia_services extends external_api {
      * Returns description of method parameters
      * @return external_function_parameters
      */
-    public static function get_user_by_idnumber_parameters() {
+    public static function get_users_by_idnumber_parameters() {
         return new external_function_parameters(
                 array(
                     'idnumbers' => new external_multiple_structure(new external_value(PARAM_RAW, 'idnumber')),
@@ -165,11 +166,11 @@ class eledia_services extends external_api {
      * @param array $usernumbers  array of user idnumbers
      * @return array An array of arrays describing users
      */
-    public static function get_user_by_idnumber($idnumbers) {
+    public static function get_users_by_idnumber($idnumbers) {
         global $DB, $CFG;
 
         require_once($CFG->dirroot . "/user/lib.php");
-	self::validate_parameters(self::get_user_by_idnumber_parameters(), array('idnumbers' => $idnumbers));
+	self::validate_parameters(self::get_users_by_idnumber_parameters(), array('idnumbers' => $idnumbers));
 
         list($uselect, $ujoin) = context_instance_preload_sql('u.id', CONTEXT_USER, 'ctx');
         list($sqlmails, $params) = $DB->get_in_or_equal($idnumbers);
@@ -212,7 +213,7 @@ class eledia_services extends external_api {
      * Returns description of method result value
      * @return external_description
      */
-    public static function get_user_by_idnumber_returns() {
+    public static function get_users_by_idnumber_returns() {
         return new external_multiple_structure(
             new external_single_structure(
                 array(
@@ -333,6 +334,7 @@ class eledia_services extends external_api {
         global $CFG, $DB;
         require_once($CFG->dirroot."/user/lib.php");
         require_once($CFG->dirroot."/user/profile/lib.php"); //required for customfields related function
+        require_once($CFG->dirroot."/local/eledia_webservicesuite/lib.php");
 
         // Ensure the current user is allowed to run this function
         $context = get_context_instance(CONTEXT_SYSTEM);
@@ -344,10 +346,9 @@ class eledia_services extends external_api {
         $transaction = $DB->start_delegated_transaction();
 
         foreach ($params['users'] as $user) {
-            $local_user = $DB->get_record('user', array('idnumber' => $user['idnumber']));
-            if(!empty($local_user)){
-                $user['id'] = $local_user->id;
-            }
+            //get user by idnumber & check for unique & existing idnumbers
+            $local_user = get_record_by_idnumber('user', $user['idnumber'], true, true, 'wsusernotfound', 'wsmultipleusersfound');
+            $user['id'] = $local_user->id;
 
             user_update_user($user);
             //update user custom fields
@@ -416,6 +417,7 @@ class eledia_services extends external_api {
         global $DB, $CFG;
 
         require_once($CFG->libdir . '/enrollib.php');
+        require_once($CFG->dirroot."/local/eledia_webservicesuite/lib.php");
 
         $params = self::validate_parameters(self::enrol_users_by_idnumber_parameters(),
                 array('enrolments' => $enrolments));
@@ -431,23 +433,12 @@ class eledia_services extends external_api {
 
         foreach ($params['enrolments'] as $enrolment) {
 
-            //get course and user by idnumber
-            $local_course = $DB->get_record('course', array('idnumber' => $enrolment['courseidnumber']));
-            if(!empty ($local_course)){
-                $enrolment['courseid'] = $local_course->id;
-            }else{
-                $errorparams = new stdClass();
-                $errorparams->courseidnumber = $enrolment['courseidnumber'];
-                throw new moodle_exception('wscoursenotfound', 'local_eledia_webservicesuite', '', $errorparams);
-            }
-            $local_user = $DB->get_record('user', array('idnumber' => $enrolment['useridnumber']));
-            if(!empty ($local_user)){
-                $enrolment['userid'] = $local_user->id;
-            }else{
-                $errorparams = new stdClass();
-                $errorparams->useridnumber = $enrolment['useridnumber'];
-                throw new moodle_exception('wsusernotfound', 'local_eledia_webservicesuite', '', $errorparams);
-            }
+            //get course and user by idnumber & check for unique & existing idnumbers
+            $local_course = get_record_by_idnumber('course', $enrolment['courseidnumber'], true, true, 'wscoursenotfound', 'wsmultiplecoursessfound');
+            $enrolment['courseid'] = $local_course->id;
+
+            $local_user = get_record_by_idnumber('user', $enrolment['useridnumber'], true, true, 'wsusernotfound', 'wsmultipleusersfound');
+            $enrolment['userid'] = $local_user->id;
 
             // Ensure the current user is allowed to run this function in the enrolment context
             $context = get_context_instance(CONTEXT_COURSE, $enrolment['courseid']);
@@ -544,6 +535,7 @@ class eledia_services extends external_api {
     public static function get_courses_by_idnumber($options = array()) {
         global $CFG, $DB;
         require_once($CFG->dirroot . "/course/lib.php");
+        require_once($CFG->dirroot."/local/eledia_webservicesuite/lib.php");
 
         //validate parameter
         $params = self::validate_parameters(self::get_courses_by_idnumber_parameters(),
@@ -557,7 +549,8 @@ class eledia_services extends external_api {
         } else {
             $courses = array();
             foreach ($params['options']['idnumbers'] as $idnumber) {
-                $course = $DB->get_record('course', array('idnumber' => $idnumber));
+                //get course by idnumber
+                $course = get_record_by_idnumber('course', $idnumber, false, true, '', 'wsmultiplecoursesfound');
                 if (empty($course)){
                     $courses[$idnumber] = null;
                 } else {
@@ -644,11 +637,11 @@ class eledia_services extends external_api {
              }
         }
 
-ob_start();
-print_r($coursesinfo);
-$debug_out = ob_get_contents();
-ob_end_clean();
-file_put_contents($CFG->dataroot."/webservice_debug.txt", $debug_out, FILE_APPEND);
+//ob_start();
+//print_r($coursesinfo);
+//$debug_out = ob_get_contents();
+//ob_end_clean();
+//file_put_contents($CFG->dataroot."/webservice_debug.txt", $debug_out, FILE_APPEND);
 
         return $coursesinfo;
     }
@@ -731,4 +724,295 @@ file_put_contents($CFG->dataroot."/webservice_debug.txt", $debug_out, FILE_APPEN
         );
     }
 
+    /**
+     * Returns description of method parameters
+     *
+     * @return external_function_parameters
+     * @since Moodle 2.2
+     */
+    public static function update_courses_by_idnumber_parameters() {
+        return new external_function_parameters(
+            array(
+                'courses' => new external_multiple_structure(
+                    new external_single_structure(
+                        array(
+                            'fullname' => new external_value(PARAM_TEXT, 'full name', VALUE_OPTIONAL),
+                            'shortname' => new external_value(PARAM_TEXT, 'course short name', VALUE_OPTIONAL),
+                            'categoryid' => new external_value(PARAM_INT, 'category id', VALUE_OPTIONAL),
+                            'idnumber' => new external_value(PARAM_RAW, 'id number'),
+                            'summary' => new external_value(PARAM_RAW, 'summary', VALUE_OPTIONAL),
+                            'summaryformat' => new external_format_value('summary', VALUE_OPTIONAL),
+                            'format' => new external_value(PARAM_PLUGIN,
+                                    'course format: weeks, topics, social, site,..',
+                                    VALUE_OPTIONAL),
+                            'showgrades' => new external_value(PARAM_INT,
+                                    '1 if grades are shown, otherwise 0', VALUE_OPTIONAL),
+                            'newsitems' => new external_value(PARAM_INT,
+                                    'number of recent items appearing on the course page',
+                                    VALUE_OPTIONAL),
+                            'startdate' => new external_value(PARAM_INT,
+                                    'timestamp when the course start', VALUE_OPTIONAL),
+                            'numsections' => new external_value(PARAM_INT,
+                                    '(deprecated, use courseformatoptions) number of weeks/topics',
+                                    VALUE_OPTIONAL),
+                            'maxbytes' => new external_value(PARAM_INT,
+                                    'largest size of file that can be uploaded into the course',
+                                    VALUE_OPTIONAL),
+                            'showreports' => new external_value(PARAM_INT,
+                                    'are activity report shown (yes = 1, no =0)', VALUE_OPTIONAL),
+                            'visible' => new external_value(PARAM_INT,
+                                    '1: available to student, 0:not available', VALUE_OPTIONAL),
+                            'hiddensections' => new external_value(PARAM_INT,
+                                    '(deprecated, use courseformatoptions) How the hidden sections in the course are displayed to students',
+                                    VALUE_OPTIONAL),
+                            'groupmode' => new external_value(PARAM_INT, 'no group, separate, visible',
+                                    VALUE_OPTIONAL),
+                            'groupmodeforce' => new external_value(PARAM_INT, '1: yes, 0: no',
+                                    VALUE_OPTIONAL),
+                            'defaultgroupingid' => new external_value(PARAM_INT, 'default grouping id',
+                                    VALUE_OPTIONAL),
+                            'enablecompletion' => new external_value(PARAM_INT,
+                                    'Enabled, control via completion and activity settings. Disabled,
+                                        not shown in activity settings.',
+                                    VALUE_OPTIONAL),
+                            'completionstartonenrol' => new external_value(PARAM_INT,
+                                    '1: begin tracking a student\'s progress in course completion after
+                                        course enrolment. 0: does not',
+                                    VALUE_OPTIONAL),
+                            'completionnotify' => new external_value(PARAM_INT,
+                                    '1: yes 0: no', VALUE_OPTIONAL),
+                            'lang' => new external_value(PARAM_SAFEDIR,
+                                    'forced course language', VALUE_OPTIONAL),
+                            'forcetheme' => new external_value(PARAM_PLUGIN,
+                                    'name of the force theme', VALUE_OPTIONAL),
+                            'courseformatoptions' => new external_multiple_structure(
+                                new external_single_structure(
+                                    array('name' => new external_value(PARAM_ALPHANUMEXT, 'course format option name'),
+                                        'value' => new external_value(PARAM_RAW, 'course format option value')
+                                )),
+                                    'additional options for particular course format', VALUE_OPTIONAL),
+                        )
+                    ), 'courses to update'
+                )
+            )
+        );
+    }
+
+    /**
+     * Update  courses by idnumber
+     *
+     * @param array $courses
+     * @return array courses (id and shortname only)
+     * @since Moodle 2.2
+     */
+    public static function update_courses_by_idnumber($courses) {
+        global $CFG, $DB;
+        require_once($CFG->dirroot . "/course/lib.php");
+        require_once($CFG->libdir . '/completionlib.php');
+        require_once($CFG->dirroot."/local/eledia_webservicesuite/lib.php");
+
+        $params = self::validate_parameters(self::update_courses_by_idnumber_parameters(),
+                        array('courses' => $courses));
+
+        $availablethemes = get_plugin_list('theme');
+        $availablelangs = get_string_manager()->get_list_of_translations();
+
+        $transaction = $DB->start_delegated_transaction();
+
+        foreach ($params['courses'] as $course) {
+            //get course by idnumber & check for unique & existing idnumbers
+            $origin_course = get_record_by_idnumber('course', $course['idnumber'], true, true, 'wscoursenotfound', 'wsmultiplecoursesfound');
+
+            $update_course = get_object_vars($origin_course);
+            foreach ($course as $field => $value) {
+                $update_course[$field] =  $value;
+            }
+
+            // Ensure the current user is allowed to run this function
+            $context = context_coursecat::instance($update_course['category'], IGNORE_MISSING);
+            try {
+                self::validate_context($context);
+            } catch (Exception $e) {
+                $exceptionparam = new stdClass();
+                $exceptionparam->message = $e->getMessage();
+                $exceptionparam->catid = $update_course['category'];
+                $exceptionparam->courseid = $update_course['category'];
+                throw new moodle_exception('errorcatcontextnotvalid', 'webservice', '', $exceptionparam);
+            }
+            require_capability('moodle/course:update', $context);
+
+            // Make sure lang is valid
+            if (!empty($update_course['lang']) && empty($availablelangs[$update_course['lang']])) {
+                throw new moodle_exception('errorinvalidparam', 'webservice', '', 'lang');
+            }
+
+            // Make sure theme is valid
+            if (array_key_exists('forcetheme', $update_course)) {
+                if (!empty($CFG->allowcoursethemes)) {
+                    if (empty($availablethemes[$update_course['forcetheme']])) {
+                        throw new moodle_exception('errorinvalidparam', 'webservice', '', 'forcetheme');
+                    } else {
+                        $update_course['theme'] = $update_course['forcetheme'];
+                    }
+                }
+            }
+
+            //force visibility if ws user doesn't have the permission to set it
+            $category = $DB->get_record('course_categories', array('id' => $update_course['categoryid']));
+            if (!has_capability('moodle/course:visibility', $context)) {
+                $update_course['visible'] = $category->visible;
+            }
+
+            $update_course['category'] = $update_course['categoryid'];
+
+            // Summary format.
+            $update_course['summaryformat'] = external_validate_format($update_course['summaryformat']);
+
+            if (!empty($update_course['courseformatoptions'])) {
+                foreach ($update_course['courseformatoptions'] as $option) {
+                    $update_course[$option['name']] = $option['value'];
+                }
+            }
+
+            //Note: update_course() core function check shortname, idnumber, category
+            update_course((object) $update_course);
+
+        }
+
+        $transaction->allow_commit();
+
+        return null;
+    }
+
+    /**
+     * Returns description of method result value
+     *
+     * @return external_description
+     * @since Moodle 2.2
+     */
+    public static function update_courses_by_idnumber_returns() {
+        return null;
+    }
+
+
+    /**
+     * Returns description of method parameters
+     * @return external_function_parameters
+     */
+    public static function get_user_by_idnumber_parameters() {
+        return new external_function_parameters(
+                array(
+                    'idnumber' => new external_value(PARAM_RAW, 'user idnumber'),//new external_multiple_structure()
+                )
+        );
+    }
+
+    /**
+     * Get user information
+     * - This function is matching the permissions of /user/profil.php
+     * - It is also matching some permissions from /user/editadvanced.php for the following fields:
+     *   auth, confirmed, idnumber, lang, theme, timezone, mailformat
+     * @param array $usernumber  array of user idnumbers
+     * @return array An array of arrays describing users
+     */
+    public static function get_user_by_idnumber($idnumber) {
+        global $CFG;
+
+        require_once($CFG->dirroot . "/user/lib.php");
+        require_once($CFG->dirroot."/local/eledia_webservicesuite/lib.php");
+	self::validate_parameters(self::get_user_by_idnumber_parameters(), array('idnumber' => $idnumber));
+
+        $user = get_record_by_idnumber ('user', $idnumber, true, true, 'wsusernotfound', 'wsmultipleusersfound');
+
+        $hasuserupdatecap = has_capability('moodle/user:update', get_system_context());
+
+        context_instance_preload($user);
+        $usercontext = get_context_instance(CONTEXT_USER, $user->id);
+        self::validate_context($usercontext);
+        $currentuser = ($user->id == $USER->id);
+
+        if ($userarray  = user_get_user_details($user)) {
+            //fields matching permissions from /user/editadvanced.php
+            if ($currentuser or $hasuserupdatecap) {
+                $userarray['auth']       = $user->auth;
+                $userarray['confirmed']  = $user->confirmed;
+                $userarray['idnumber']   = $user->idnumber;
+                $userarray['lang']       = $user->lang;
+                $userarray['theme']      = $user->theme;
+                $userarray['timezone']   = $user->timezone;
+                $userarray['mailformat'] = $user->mailformat;
+            }
+        }
+        return $userarray;
+    }
+
+    /**
+     * Returns description of method result value
+     * @return external_description
+     */
+    public static function get_user_by_idnumber_returns() {
+        return new external_single_structure(
+                array(
+                    'id'    => new external_value(PARAM_NUMBER, 'ID of the user'),
+                    'username'    => new external_value(PARAM_RAW, 'Username policy is defined in Moodle security config', VALUE_OPTIONAL),
+                    'firstname'   => new external_value(PARAM_NOTAGS, 'The first name(s) of the user', VALUE_OPTIONAL),
+                    'lastname'    => new external_value(PARAM_NOTAGS, 'The family name of the user', VALUE_OPTIONAL),
+                    'fullname'    => new external_value(PARAM_NOTAGS, 'The fullname of the user'),
+                    'email'       => new external_value(PARAM_TEXT, 'An email address - allow email as root@localhost', VALUE_OPTIONAL),
+                    'address'     => new external_value(PARAM_MULTILANG, 'Postal address', VALUE_OPTIONAL),
+                    'phone1'      => new external_value(PARAM_NOTAGS, 'Phone 1', VALUE_OPTIONAL),
+                    'phone2'      => new external_value(PARAM_NOTAGS, 'Phone 2', VALUE_OPTIONAL),
+                    'icq'         => new external_value(PARAM_NOTAGS, 'icq number', VALUE_OPTIONAL),
+                    'skype'       => new external_value(PARAM_NOTAGS, 'skype id', VALUE_OPTIONAL),
+                    'yahoo'       => new external_value(PARAM_NOTAGS, 'yahoo id', VALUE_OPTIONAL),
+                    'aim'         => new external_value(PARAM_NOTAGS, 'aim id', VALUE_OPTIONAL),
+                    'msn'         => new external_value(PARAM_NOTAGS, 'msn number', VALUE_OPTIONAL),
+                    'department'  => new external_value(PARAM_TEXT, 'department', VALUE_OPTIONAL),
+                    'institution' => new external_value(PARAM_TEXT, 'institution', VALUE_OPTIONAL),
+                    'interests'   => new external_value(PARAM_TEXT, 'user interests (separated by commas)', VALUE_OPTIONAL),
+                    'firstaccess' => new external_value(PARAM_INT, 'first access to the site (0 if never)', VALUE_OPTIONAL),
+                    'lastaccess'  => new external_value(PARAM_INT, 'last access to the site (0 if never)', VALUE_OPTIONAL),
+                    'auth'        => new external_value(PARAM_PLUGIN, 'Auth plugins include manual, ldap, imap, etc', VALUE_OPTIONAL),
+                    'confirmed'   => new external_value(PARAM_NUMBER, 'Active user: 1 if confirmed, 0 otherwise', VALUE_OPTIONAL),
+                    'idnumber'    => new external_value(PARAM_RAW, 'An arbitrary ID code number perhaps from the institution', VALUE_OPTIONAL),
+                    'lang'        => new external_value(PARAM_SAFEDIR, 'Language code such as "en", must exist on server', VALUE_OPTIONAL),
+                    'theme'       => new external_value(PARAM_PLUGIN, 'Theme name such as "standard", must exist on server', VALUE_OPTIONAL),
+                    'timezone'    => new external_value(PARAM_TIMEZONE, 'Timezone code such as Australia/Perth, or 99 for default', VALUE_OPTIONAL),
+                    'mailformat'  => new external_value(PARAM_INTEGER, 'Mail format code is 0 for plain text, 1 for HTML etc', VALUE_OPTIONAL),
+                    'description' => new external_value(PARAM_RAW, 'User profile description', VALUE_OPTIONAL),
+                    'descriptionformat' => new external_value(PARAM_INT, 'User profile description format', VALUE_OPTIONAL),
+                    'city'        => new external_value(PARAM_NOTAGS, 'Home city of the user', VALUE_OPTIONAL),
+                    'url'         => new external_value(PARAM_URL, 'URL of the user', VALUE_OPTIONAL),
+                    'country'     => new external_value(PARAM_ALPHA, 'Home country code of the user, such as AU or CZ', VALUE_OPTIONAL),
+                    'profileimageurlsmall' => new external_value(PARAM_URL, 'User image profile URL - small version'),
+                    'profileimageurl' => new external_value(PARAM_URL, 'User image profile URL - big version'),
+                    'customfields' => new external_multiple_structure(
+                        new external_single_structure(
+                            array(
+                                'type'  => new external_value(PARAM_ALPHANUMEXT, 'The type of the custom field - text field, checkbox...'),
+                                'value' => new external_value(PARAM_RAW, 'The value of the custom field'),
+                                'name' => new external_value(PARAM_RAW, 'The name of the custom field'),
+                                'shortname' => new external_value(PARAM_RAW, 'The shortname of the custom field - to be able to build the field class in the code'),
+                            )
+                    ), 'User custom fields (also known as user profil fields)', VALUE_OPTIONAL),
+                    'preferences' => new external_multiple_structure(
+                        new external_single_structure(
+                            array(
+                                'name'  => new external_value(PARAM_ALPHANUMEXT, 'The name of the preferences'),
+                                'value' => new external_value(PARAM_RAW, 'The value of the custom field'),
+                            )
+                    ), 'User preferences', VALUE_OPTIONAL),
+                    'enrolledcourses' => new external_multiple_structure(
+                        new external_single_structure(
+                            array(
+                                'id'  => new external_value(PARAM_INT, 'Id of the course'),
+                                'fullname'  => new external_value(PARAM_RAW, 'Fullname of the course'),
+                                'shortname' => new external_value(PARAM_RAW, 'Shortname of the course')
+                            )
+                    ), 'Courses where the user is enrolled - limited by which courses the user is able to see', VALUE_OPTIONAL)
+                )
+        );
+    }
+
 }
+
