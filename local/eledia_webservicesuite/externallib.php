@@ -1014,5 +1014,55 @@ class eledia_services extends external_api {
         );
     }
 
+    /**
+     * Returns description of method parameters
+     * @return external_function_parameters
+     */
+    public static function unenrol_users_by_idnumber_parameters() {
+        return new external_function_parameters(
+                array(
+                    'enrolments' => new external_multiple_structure(
+                            new external_single_structure(
+                                    array(
+                                        'useridnumber' => new external_value(PARAM_RAW, 'user idnumber'),
+                                        'courseidnumber' => new external_value(PARAM_RAW, 'course idnumber'),
+                                        'enrolname' => new external_value(PARAM_RAW, 'enrolment'),
+                                    )
+                            )
+                    )
+                )
+        );
+    }
+
+    /**
+     * unenrol user from course
+     * - This function unenrols a list of users from the the given enrolments in the given courses.
+     * @param array $usernumber  array of user idnumbers, course idnumbers and enrolname
+     */
+    public static function unenrol_users_by_idnumber($params) {
+        global $CFG, $DB;
+
+        require_once($CFG->dirroot."/local/eledia_webservicesuite/lib.php");
+	self::validate_parameters(self::unenrol_users_by_idnumber_parameters(), array('enrolments' => $params));
+
+        foreach ($params as $param) {
+            $user = get_record_by_idnumber ('user', $param['useridnumber'], true, true, 'wsusernotfound', 'wsmultipleusersfound');
+            $course = get_record_by_idnumber ('course', $param['courseidnumber'], true, true, 'wscoursenotfound', 'wsmultiplecoursesfound');
+
+            $enrolmentinstance = $DB->get_record('enrol', array('courseid' => $course->id, 'enrol' => $param['enrolname']));
+
+            $plugin = enrol_get_plugin($enrolmentinstance->enrol);
+            $plugin->unenrol_user($enrolmentinstance, $user->id);
+        }
+    }
+
+    /**
+     * Returns description of method result value
+     * @return external_description
+     */
+    public static function unenrol_users_by_idnumber_returns() {
+        return null;
+    }
+
 }
 

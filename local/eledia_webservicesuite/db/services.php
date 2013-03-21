@@ -56,13 +56,21 @@ $functions = array(
 		'type' => 'write',
 		'capabilities' => 'local/eledia_webservicesuite:access, moodle/course:view, moodle/course:update, moodle/course:viewhiddencourses, moodle/course:visibility',
 	),
-    'elediaservice_get_user_by_idnumber' => array(
+        'elediaservice_get_user_by_idnumber' => array(
 		'classname' => 'eledia_services',
 		'methodname' => 'get_user_by_idnumber',
 		'classpath' => 'local/eledia_webservicesuite/externallib.php',
 		'description' => 'returns a list of users object according to the given idnumbers',
 		'type' => 'write',
 		'capabilities' => 'local/eledia_webservicesuite:access, moodle/user:viewdetails',
+	),
+        'elediaservice_unenrol_users_by_idnumber' => array(
+		'classname' => 'eledia_services',
+		'methodname' => 'unenrol_users_by_idnumber',
+		'classpath' => 'local/eledia_webservicesuite/externallib.php',
+		'description' => 'unenrols a list of users from the the given enrolments in the given courses',
+		'type' => 'write',
+		'capabilities' => 'local/eledia_webservicesuite:access, enrol/authorize:unenrol',
 	),
 );
 
