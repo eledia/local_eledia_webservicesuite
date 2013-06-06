@@ -514,13 +514,11 @@ class eledia_services extends external_api {
      */
     public static function get_courses_by_idnumber_parameters() {
         return new external_function_parameters(
-                array('options' => new external_single_structure(
-                            array('idnumbers' => new external_multiple_structure(
-                                        new external_value(PARAM_RAW, 'Course idnumber')
-                                        , 'List of course idnumbers. If empty return all courses
-                                            except front page course.',
-                                        VALUE_OPTIONAL)
-                            ), 'options - operator OR is used', VALUE_DEFAULT, array())
+                        array('idnumbers' => new external_multiple_structure(
+                                    new external_value(PARAM_RAW, 'Course idnumber')
+                                    , 'List of course idnumbers. If empty return all courses
+                                        except front page course.',
+                                    VALUE_OPTIONAL)
                 )
         );
     }
@@ -539,16 +537,14 @@ class eledia_services extends external_api {
 
         //validate parameter
         $params = self::validate_parameters(self::get_courses_by_idnumber_parameters(),
-                        array('options' => $options));
-
+                        array('idnumbers' => $options));
 
         //retrieve courses
-        if (!array_key_exists('idnumbers', $params['options'])
-                or empty($params['options']['idnumbers'])) {
+        if (empty($params['idnumbers'])) {
             $courses = $DB->get_records('course');
         } else {
             $courses = array();
-            foreach ($params['options']['idnumbers'] as $idnumber) {
+            foreach ($params['idnumbers'] as $idnumber) {
                 //get course by idnumber
                 $course = get_record_by_idnumber('course', $idnumber, false, true, '', 'wsmultiplecoursesfound');
                 if (empty($course)){
