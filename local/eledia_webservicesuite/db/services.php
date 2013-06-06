@@ -72,5 +72,13 @@ $functions = array(
 		'type' => 'write',
 		'capabilities' => 'local/eledia_webservicesuite:access, enrol/authorize:unenrol',
 	),
+            'elediaservice_get_course_by_idnumber' => array(
+		'classname' => 'eledia_services',
+		'methodname' => 'get_course_by_idnumber',
+		'classpath' => 'local/eledia_webservicesuite/externallib.php',
+		'description' => 'returns a course object according to the given idnumber',
+		'type' => 'write',
+		'capabilities' => 'local/eledia_webservicesuite:access, moodle/course:view, moodle/course:update, moodle/course:viewhiddencourses',
+	),
 );
 

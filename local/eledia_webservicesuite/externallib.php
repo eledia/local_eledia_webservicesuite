@@ -517,8 +517,7 @@ class eledia_services extends external_api {
                         array('idnumbers' => new external_multiple_structure(
                                     new external_value(PARAM_RAW, 'Course idnumber')
                                     , 'List of course idnumbers. If empty return all courses
-                                        except front page course.',
-                                    VALUE_OPTIONAL)
+                                        except front page course.')
                 )
         );
     }
@@ -632,12 +631,6 @@ class eledia_services extends external_api {
                  $coursesinfo[$idnumber] = $courseinfo;
              }
         }
-
-//ob_start();
-//print_r($coursesinfo);
-//$debug_out = ob_get_contents();
-//ob_end_clean();
-//file_put_contents($CFG->dataroot."/webservice_debug.txt", $debug_out, FILE_APPEND);
 
         return $coursesinfo;
     }
@@ -898,7 +891,7 @@ class eledia_services extends external_api {
     public static function get_user_by_idnumber_parameters() {
         return new external_function_parameters(
                 array(
-                    'idnumber' => new external_value(PARAM_RAW, 'user idnumber'),//new external_multiple_structure()
+                    'idnumber' => new external_value(PARAM_RAW, 'user idnumber'),
                 )
         );
     }
@@ -916,9 +909,9 @@ class eledia_services extends external_api {
 
         require_once($CFG->dirroot . "/user/lib.php");
         require_once($CFG->dirroot."/local/eledia_webservicesuite/lib.php");
-	self::validate_parameters(self::get_user_by_idnumber_parameters(), array('idnumber' => $idnumber));
+	$params = self::validate_parameters(self::get_user_by_idnumber_parameters(), array('idnumber' => $idnumber));
 
-        $user = get_record_by_idnumber ('user', $idnumber, true, true, 'wsusernotfound', 'wsmultipleusersfound');
+        $user = get_record_by_idnumber ('user', $params['idnumber'], true, true, 'wsusernotfound', 'wsmultipleusersfound');
 
         $hasuserupdatecap = has_capability('moodle/user:update', get_system_context());
 
@@ -1060,5 +1053,192 @@ class eledia_services extends external_api {
         return null;
     }
 
+    /**
+     * Returns description of method parameters
+     *
+     * @return external_function_parameters
+     * @since Moodle 2.3
+     */
+    public static function get_course_by_idnumber_parameters() {
+        return new external_function_parameters(
+            array(
+                'idnumber' => new external_value(PARAM_RAW, 'Course idnumber'),
+                )
+        );
+    }
+
+    /**
+     * Get courses by idnumber
+     *
+     * @param array $options It contains an array (list of ids)
+     * @return array
+     * @since Moodle 2.2
+     */
+    public static function get_course_by_idnumber($options = array()) {
+        global $CFG, $DB;
+        require_once($CFG->dirroot . "/course/lib.php");
+        require_once($CFG->dirroot."/local/eledia_webservicesuite/lib.php");
+
+        //validate parameter
+        $params = self::validate_parameters(self::get_course_by_idnumber_parameters(),
+                        array('idnumber' => $options));
+
+        //create return value
+        $courseinfo = array();
+
+        //retrieve courses
+        if (empty($params['idnumber'])) {
+            //todo error handle
+            return;
+        } else {
+            $idnumber = $params['idnumber'];
+            //get course by idnumber
+            $course = get_record_by_idnumber('course', $idnumber, false, true, '', 'wsmultiplecoursesfound');
+            //if course not found, set info text
+            if (!$course) {
+//                $courseinfo['msg'] = 'course not found';
+                return $courseinfo;
+            }
+        }
+
+        // now security checks
+         $context = context_course::instance($course->id, IGNORE_MISSING);
+         $courseformatoptions = course_get_format($course)->get_format_options();
+         try {
+             self::validate_context($context);
+         } catch (Exception $e) {
+             $exceptionparam = new stdClass();
+             $exceptionparam->message = $e->getMessage();
+             $exceptionparam->courseid = $course->id;
+             throw new moodle_exception('errorcoursecontextnotvalid', 'webservice', '', $exceptionparam);
+         }
+         require_capability('moodle/course:view', $context);
+
+         $courseinfo['id'] = $course->id;
+         $courseinfo['fullname'] = $course->fullname;
+         $courseinfo['shortname'] = $course->shortname;
+         $courseinfo['categoryid'] = $course->category;
+         list($courseinfo['summary'], $courseinfo['summaryformat']) =
+             external_format_text($course->summary, $course->summaryformat, $context->id, 'course', 'summary', 0);
+         $courseinfo['format'] = $course->format;
+         $courseinfo['startdate'] = $course->startdate;
+         if (array_key_exists('numsections', $courseformatoptions)) {
+             // For backward-compartibility
+             $courseinfo['numsections'] = $courseformatoptions['numsections'];
+         }
+
+         //some field should be returned only if the user has update permission
+         $courseadmin = has_capability('moodle/course:update', $context);
+         if ($courseadmin) {
+             $courseinfo['categorysortorder'] = $course->sortorder;
+             $courseinfo['idnumber'] = $course->idnumber;
+             $courseinfo['showgrades'] = $course->showgrades;
+             $courseinfo['showreports'] = $course->showreports;
+             $courseinfo['newsitems'] = $course->newsitems;
+             $courseinfo['visible'] = $course->visible;
+             $courseinfo['maxbytes'] = $course->maxbytes;
+             if (array_key_exists('hiddensections', $courseformatoptions)) {
+                 // For backward-compartibility
+                 $courseinfo['hiddensections'] = $courseformatoptions['hiddensections'];
+             }
+             $courseinfo['groupmode'] = $course->groupmode;
+             $courseinfo['groupmodeforce'] = $course->groupmodeforce;
+             $courseinfo['defaultgroupingid'] = $course->defaultgroupingid;
+             $courseinfo['lang'] = $course->lang;
+             $courseinfo['timecreated'] = $course->timecreated;
+             $courseinfo['timemodified'] = $course->timemodified;
+             $courseinfo['forcetheme'] = $course->theme;
+             $courseinfo['enablecompletion'] = $course->enablecompletion;
+             $courseinfo['completionstartonenrol'] = $course->completionstartonenrol;
+             $courseinfo['completionnotify'] = $course->completionnotify;
+             $courseinfo['courseformatoptions'] = array();
+             foreach ($courseformatoptions as $key => $value) {
+                 $courseinfo['courseformatoptions'][] = array(
+                     'name' => $key,
+                     'value' => $value
+                 );
+             }
+         }
+
+         if ($courseadmin or $course->visible
+                 or has_capability('moodle/course:viewhiddencourses', $context)) {
+             $courseinfo[$idnumber] = $courseinfo;
+         }
+        return $courseinfo;
+    }
+
+    /**
+     * Returns description of method result value
+     *
+     * @return external_description
+     */
+    public static function get_course_by_idnumber_returns() {
+        return new external_single_structure(
+            array(
+                'msg' => new external_value(PARAM_TEXT, 'error msg', VALUE_OPTIONAL),
+                'id' => new external_value(PARAM_INT, 'course id', VALUE_OPTIONAL),
+                'shortname' => new external_value(PARAM_TEXT, 'course short name', VALUE_OPTIONAL),
+                'categoryid' => new external_value(PARAM_INT, 'category id', VALUE_OPTIONAL),
+                'categorysortorder' => new external_value(PARAM_INT,
+                        'sort order into the category', VALUE_OPTIONAL),
+                'fullname' => new external_value(PARAM_TEXT, 'full name', VALUE_OPTIONAL),
+                'idnumber' => new external_value(PARAM_RAW, 'id number', VALUE_OPTIONAL),
+                'summary' => new external_value(PARAM_RAW, 'summary', VALUE_OPTIONAL),
+                'summaryformat' => new external_format_value('summary', VALUE_OPTIONAL),
+                'format' => new external_value(PARAM_PLUGIN,
+                        'course format: weeks, topics, social, site,..', VALUE_OPTIONAL),
+                'showgrades' => new external_value(PARAM_INT,
+                        '1 if grades are shown, otherwise 0', VALUE_OPTIONAL),
+                'newsitems' => new external_value(PARAM_INT,
+                        'number of recent items appearing on the course page', VALUE_OPTIONAL),
+                'startdate' => new external_value(PARAM_INT,
+                        'timestamp when the course start', VALUE_OPTIONAL),
+                'numsections' => new external_value(PARAM_INT,
+                        '(deprecated, use courseformatoptions) number of weeks/topics',
+                        VALUE_OPTIONAL),
+                'maxbytes' => new external_value(PARAM_INT,
+                        'largest size of file that can be uploaded into the course',
+                        VALUE_OPTIONAL),
+                'showreports' => new external_value(PARAM_INT,
+                        'are activity report shown (yes = 1, no =0)', VALUE_OPTIONAL),
+                'visible' => new external_value(PARAM_INT,
+                        '1: available to student, 0:not available', VALUE_OPTIONAL),
+                'hiddensections' => new external_value(PARAM_INT,
+                        '(deprecated, use courseformatoptions) How the hidden sections in the course are displayed to students',
+                        VALUE_OPTIONAL),
+                'groupmode' => new external_value(PARAM_INT, 'no group, separate, visible',
+                        VALUE_OPTIONAL),
+                'groupmodeforce' => new external_value(PARAM_INT, '1: yes, 0: no',
+                        VALUE_OPTIONAL),
+                'defaultgroupingid' => new external_value(PARAM_INT, 'default grouping id',
+                        VALUE_OPTIONAL),
+                'timecreated' => new external_value(PARAM_INT,
+                        'timestamp when the course have been created', VALUE_OPTIONAL),
+                'timemodified' => new external_value(PARAM_INT,
+                        'timestamp when the course have been modified', VALUE_OPTIONAL),
+                'enablecompletion' => new external_value(PARAM_INT,
+                        'Enabled, control via completion and activity settings. Disbaled,
+                            not shown in activity settings.',
+                        VALUE_OPTIONAL),
+                'completionstartonenrol' => new external_value(PARAM_INT,
+                        '1: begin tracking a student\'s progress in course completion
+                            after course enrolment. 0: does not',
+                        VALUE_OPTIONAL),
+                'completionnotify' => new external_value(PARAM_INT,
+                        '1: yes 0: no', VALUE_OPTIONAL),
+                'lang' => new external_value(PARAM_SAFEDIR,
+                        'forced course language', VALUE_OPTIONAL),
+                'forcetheme' => new external_value(PARAM_PLUGIN,
+                        'name of the force theme', VALUE_OPTIONAL),
+                'courseformatoptions' => new external_multiple_structure(
+                    new external_single_structure(
+                        array('name' => new external_value(PARAM_ALPHANUMEXT, 'course format option name'),
+                            'value' => new external_value(PARAM_RAW, 'course format option value')
+                    )),
+                        'additional options for particular course format', VALUE_OPTIONAL
+                 ),
+            ), 'course'
+        );
+    }
 }
 
