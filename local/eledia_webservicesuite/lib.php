@@ -1,7 +1,31 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Get a moodle record by a unique idnumber
+ * A small helper lib of the elediawebservicesuite.
+ *
+ * @package    local
+ * @subpackage eledia_webservicesuite
+ * @author     Benjamin Wolf <support@eledia.de>
+ * @copyright  2013 eLeDia GmbH
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+/**
+ * Get a moodle record by a unique idnumber.
  *
  * @param string $table The table to search in
  * @param string $idnumber The idnumber to search for
@@ -16,12 +40,12 @@ function get_record_by_idnumber ($table,
         $multiple_exception = false,
         $notfound_errorcode = 'wsidnumbernotfound',
         $multiple_errorcode = 'wsmultipleidnumbersfound',
-        $module = 'local_eledia_webservicesuite'){
+        $module = 'local_eledia_webservicesuite') {
 
     global $DB;
     if ($table == 'user') {
         $count = $DB->count_records($table, array('idnumber' => $idnumber, 'deleted' => 0));
-    }else{
+    } else {
         $count = $DB->count_records($table, array('idnumber' => $idnumber));
     }
 
@@ -37,7 +61,7 @@ function get_record_by_idnumber ($table,
         case 1:
             if ($table == 'user') {
                 return $DB->get_record($table, array('idnumber' => $idnumber, 'deleted' => 0));
-            } else{
+            } else {
                 return $DB->get_record($table, array('idnumber' => $idnumber));
             }
         default:
@@ -45,7 +69,7 @@ function get_record_by_idnumber ($table,
                 $errorparams = new stdClass();
                 $errorparams->idnumber = $idnumber;
                 throw new moodle_exception($multiple_errorcode, $module, '', $errorparams);
-            }  else {
+            } else {
                 return false;
             }
             break;
