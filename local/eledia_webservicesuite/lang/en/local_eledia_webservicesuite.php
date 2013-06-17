@@ -14,16 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Lang file of the elediawebservicesuite.
- *
- * @package    local
- * @subpackage eledia_webservicesuite
- * @author     Benjamin Wolf <support@eledia.de>
- * @copyright  2013 eLeDia GmbH
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 $string['pluginname'] = 'eLeDia webservices';
 $string['eledia_webservicesuite:access'] = 'Access right for all functions of this web service';
 $string['wscannotenrol'] = 'Plugin instance cannot manually enrol a user in the course id = {$a->courseid}';
