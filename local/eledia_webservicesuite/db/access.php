@@ -15,19 +15,23 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /*************************************************
- * Capabilites for eledia_gradeexport_webservice
+ * Capabilites for eledia_webservicesuite
  *
  * Defines one all purpose capability, that is used to control
- * access to the webservice
+ * access to the webservice.
  *
- * @author Benjamin Wolf <benjamin.wolf@eledia.de>
+ * @package    local
+ * @subpackage eledia_webservicesuite
+ * @author     Benjamin Wolf <support@eledia.de>
+ * @copyright  2013 eLeDia GmbH
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $capabilities = array(
-	'local/eledia_webservicesuite:access' => array(
-		'captype' => 'write',
-		'contextlevel' => CONTEXT_SYSTEM,
-	),
+    'local/eledia_webservicesuite:access' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+    ),
 );
 
 

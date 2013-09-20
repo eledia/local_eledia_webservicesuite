@@ -15,7 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Get a moodle record by a unique idnumber
+ * A small helper lib of the elediawebservicesuite.
+ *
+ * @package    local
+ * @subpackage eledia_webservicesuite
+ * @author     Benjamin Wolf <support@eledia.de>
+ * @copyright  2013 eLeDia GmbH
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+/**
+ * Get a moodle record by a unique idnumber.
  *
  * @param string $table The table to search in
  * @param string $idnumber The idnumber to search for
@@ -30,12 +40,12 @@ function get_record_by_idnumber ($table,
         $multiple_exception = false,
         $notfound_errorcode = 'wsidnumbernotfound',
         $multiple_errorcode = 'wsmultipleidnumbersfound',
-        $module = 'local_eledia_webservicesuite'){
+        $module = 'local_eledia_webservicesuite') {
 
     global $DB;
     if ($table == 'user') {
         $count = $DB->count_records($table, array('idnumber' => $idnumber, 'deleted' => 0));
-    }else{
+    } else {
         $count = $DB->count_records($table, array('idnumber' => $idnumber));
     }
 
@@ -51,7 +61,7 @@ function get_record_by_idnumber ($table,
         case 1:
             if ($table == 'user') {
                 return $DB->get_record($table, array('idnumber' => $idnumber, 'deleted' => 0));
-            } else{
+            } else {
                 return $DB->get_record($table, array('idnumber' => $idnumber));
             }
         default:
@@ -59,7 +69,7 @@ function get_record_by_idnumber ($table,
                 $errorparams = new stdClass();
                 $errorparams->idnumber = $idnumber;
                 throw new moodle_exception($multiple_errorcode, $module, '', $errorparams);
-            }  else {
+            } else {
                 return false;
             }
             break;
