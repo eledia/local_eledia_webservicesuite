@@ -92,5 +92,13 @@ $functions = array(
         'type' => 'write',
         'capabilities' => 'local/eledia_webservicesuite:access, enrol/authorize:unenrol',
     ),
+    'elediaservice_course_completion' => array(
+        'classname' => 'eledia_services',
+        'methodname' => 'course_completion',
+        'classpath' => 'local/eledia_webservicesuite/externallib.php',
+        'description' => 'returns the completion onformation for the user with the given idnumber and the course with the given idnumber',
+        'type' => 'write',
+        'capabilities' => 'report/completion:view',
+    ),
 );
 
