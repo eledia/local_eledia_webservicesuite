@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/*************************************************
+/**
  * Function definition for the eledia_webservicesuite functions.
  *
  * @package    local
@@ -96,7 +96,8 @@ $functions = array(
         'classname' => 'eledia_services',
         'methodname' => 'course_completion',
         'classpath' => 'local/eledia_webservicesuite/externallib.php',
-        'description' => 'returns the completion onformation for the user with the given idnumber and the course with the given idnumber',
+        'description' =>
+            'returns the completion information for the user with the given idnumber and the course with the given idnumber',
         'type' => 'write',
         'capabilities' => 'report/completion:view',
     ),

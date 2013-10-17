@@ -402,7 +402,7 @@ class eledia_services extends external_api {
         require_capability('moodle/user:update', $context);
         self::validate_context($context);
 
-        $params = self::validate_parameters(self::update_users_by_idnumber_parameters(), array('users'=>$users));
+        $params = self::validate_parameters(self::update_users_by_idnumber_parameters(), array('users' => $users));
 
         $transaction = $DB->start_delegated_transaction();
 
@@ -578,15 +578,13 @@ class eledia_services extends external_api {
      * @return null
      */
     public static function enrol_users_by_idnumber_returns() {
-        return null;
-        return new external_value(PARAM_BOOL, 'Success');// Enrol user function does not give us a success or not information.
+        return null;// Enrol user function does not give us a success or not information.
     }
 
     /**
      * Returns description of method parameters
      *
      * @return external_function_parameters
-     * @since Moodle 2.3
      */
     public static function get_courses_by_idnumber_parameters() {
         return new external_function_parameters(
@@ -603,7 +601,6 @@ class eledia_services extends external_api {
      *
      * @param array $options It contains an array (list of ids)
      * @return array
-     * @since Moodle 2.2
      */
     public static function get_courses_by_idnumber($options = array()) {
         global $CFG, $DB;
@@ -714,7 +711,6 @@ class eledia_services extends external_api {
      * Returns description of method result value
      *
      * @return external_description
-     * @since Moodle 2.2
      */
     public static function get_courses_by_idnumber_returns() {
         return new external_multiple_structure(
@@ -793,7 +789,6 @@ class eledia_services extends external_api {
      * Returns description of method parameters
      *
      * @return external_function_parameters
-     * @since Moodle 2.2
      */
     public static function update_courses_by_idnumber_parameters() {
         return new external_function_parameters(
@@ -869,7 +864,6 @@ class eledia_services extends external_api {
      *
      * @param array $courses
      * @return array courses (id and shortname only)
-     * @since Moodle 2.2
      */
     public static function update_courses_by_idnumber($courses) {
         global $CFG, $DB;
@@ -896,7 +890,7 @@ class eledia_services extends external_api {
 
             $update_course = get_object_vars($origin_course);
             foreach ($course as $field => $value) {
-                $update_course[$field] =  $value;
+                $update_course[$field] = $value;
             }
 
             // Ensure the current user is allowed to run this function.
@@ -959,7 +953,6 @@ class eledia_services extends external_api {
      * Returns description of method result value
      *
      * @return external_description
-     * @since Moodle 2.2
      */
     public static function update_courses_by_idnumber_returns() {
         return null;

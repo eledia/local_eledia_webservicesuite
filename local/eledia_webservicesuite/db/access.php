@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/*************************************************
+/**
  * Capabilites for eledia_webservicesuite
  *
  * Defines one all purpose capability, that is used to control

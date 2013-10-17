@@ -14,4 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Version information.
+ *
+ * @package    local
+ * @subpackage eledia_webservicesuite
+ * @author     Benjamin Wolf <support@eledia.de>
+ * @copyright  2013 eLeDia GmbH
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 $plugin->version  = 2013092400;   // The (date) version of this plugin.
+$plugin->release = '0.1 (2013092400)';
+$plugin->requires  = 2013050100;        // Requires this Moodle version.
+$plugin->component = 'block_eledia_webservicesuite'; // Full name of the plugin (used for diagnostics).
+$plugin->maturity = MATURITY_STABLE;
