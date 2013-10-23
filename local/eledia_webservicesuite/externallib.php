@@ -1150,9 +1150,20 @@ class eledia_services extends external_api {
      */
     public static function course_completion_parameters() {
         return new external_function_parameters(
+//            array(
+//                'useridnumber' => new external_value(PARAM_RAW, 'user idnumber'),
+//                'courseidnumber' => new external_value(PARAM_RAW, 'course idnumber'),
+//            )
             array(
-                'useridnumber' => new external_value(PARAM_RAW, 'user idnumber'),
-                'courseidnumber' => new external_value(PARAM_RAW, 'course idnumber'),
+                'completion' =>
+                new external_multiple_structure(
+                        new external_single_structure(
+                            array(
+                                'useridnumber' => new external_value(PARAM_RAW, 'user idnumber'),
+                                'courseidnumber' => new external_value(PARAM_RAW, 'course idnumber'),
+                            )
+                        )
+                )
             )
         );
     }
@@ -1164,9 +1175,12 @@ class eledia_services extends external_api {
      * @return array An array with  the completion information for the user in the specified course
      */
     public static function course_completion($params) {
-        global $CFG, $DB;
+        global $CFG;
         require_once($CFG->dirroot."/local/eledia_webservicesuite/lib.php");
-        self::validate_parameters(self::course_completion_parameters(), $params);
+
+//        self::validate_parameters(self::course_completion_parameters(), $params);
+        self::validate_parameters(self::course_completion_parameters(), array('completion' => $params));
+        $params = $params['completion'];
 
         require_once($CFG->dirroot.'/lib/completionlib.php');
 
@@ -1230,4 +1244,3 @@ class eledia_services extends external_api {
         );
     }
 }
-
