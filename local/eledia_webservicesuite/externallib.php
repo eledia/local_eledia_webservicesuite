@@ -1180,7 +1180,7 @@ class eledia_services extends external_api {
 
 //        self::validate_parameters(self::course_completion_parameters(), $params);
         self::validate_parameters(self::course_completion_parameters(), array('completion' => $params));
-        $params = $params['completion'];
+        $params = $params[0];
 
         require_once($CFG->dirroot.'/lib/completionlib.php');
 
