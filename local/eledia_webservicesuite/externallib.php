@@ -1180,7 +1180,7 @@ class eledia_services extends external_api {
 
 //        self::validate_parameters(self::course_completion_parameters(), $params);
         self::validate_parameters(self::course_completion_parameters(), array('completion' => $params));
-        $params = $params[0];
+        $params = $params[0];//'completion'
 
         require_once($CFG->dirroot.'/lib/completionlib.php');
 
@@ -1243,4 +1243,105 @@ class eledia_services extends external_api {
             )
         );
     }
+
+
+    /**
+     * Returns description of method parameters
+     * @return external_function_parameters
+     */
+    public static function course_completion_simple_parameters() {
+        return new external_function_parameters(
+            array(
+                'useridnumber' => new external_value(PARAM_RAW, 'user idnumber'),
+                'courseidnumber' => new external_value(PARAM_RAW, 'course idnumber'),
+            )
+        );
+    }
+
+    /**
+     * Returns course completion list
+     *
+     * @param array $params array contains user idnumber and course idnumber
+     * @return array An array with  the completion information for the user in the specified course
+     */
+    public static function course_completion_simple($params) {
+        global $CFG;
+        require_once($CFG->dirroot."/local/eledia_webservicesuite/lib.php");
+
+ob_start();
+print_r($params);
+$debug_out = ob_get_contents();
+ob_end_clean();
+file_put_contents($CFG->dataroot."/webservice_debug.txt", $debug_out, FILE_APPEND);
+
+        self::validate_parameters(self::course_completion_simple_parameters(), $params);
+
+ob_start();
+print_r($params);
+$debug_out = ob_get_contents();
+ob_end_clean();
+file_put_contents($CFG->dataroot."/webservice_debug.txt", $debug_out, FILE_APPEND);
+
+        require_once($CFG->dirroot.'/lib/completionlib.php');
+
+        $user = get_record_by_idnumber ('user', $params['useridnumber'], true, true, 'wsusernotfound', 'wsmultipleusersfound');
+        $course = get_record_by_idnumber ('course',
+                $params['courseidnumber'],
+                true,
+                true,
+                'wscoursenotfound',
+                'wsmultiplecoursesfound');
+        require_capability('report/completion:view', CONTEXT_COURSE::instance($course->id));
+        $info = new completion_info($course);
+        $result = $info->get_completions($user->id);
+
+        $comp_info_formated = array();
+        foreach ($result as $completion) {
+            $completion_info = new stdClass();
+            $completion_info->criteriaid = $completion->criteriaid;
+            $completion_info->gradefinal = $completion->gradefinal;
+            $completion_info->timecompleted = $completion->timecompleted;
+            $criteria = $completion->get_criteria();
+            $completion_info->criteriatype = $criteria->criteriatype;
+            $completion_info->module = $criteria->module;
+            $completion_info->moduleinstance = $criteria->moduleinstance;
+            $completion_info->gradepass = $criteria->gradepass;
+            $comp_info_formated[] = $completion_info;
+        }
+
+        $ccompletion = new completion_completion(array('userid' => $user->id, 'course' => $course->id));
+        $course_comp = $ccompletion->is_complete();
+
+        $output['course_completed'] = $course_comp;
+        $output['criteria_list'] = $comp_info_formated;
+        return array($output);
+    }
+
+    /**
+     * Returns description of method result value
+     * @return external_description
+     */
+    public static function course_completion_simple_returns() {
+        return new external_multiple_structure(
+            new external_single_structure(
+                array(
+                    'course_completed'    => new external_value(PARAM_BOOL, 'completion status of the user'),
+                    'criteria_list'       => new external_multiple_structure(
+                        new external_single_structure(
+                            array(
+                                'criteriaid' => new external_value(PARAM_INT, 'completion status of the user'),
+                                'gradefinal' => new external_value(PARAM_FLOAT, 'completion status of the user', VALUE_OPTIONAL),
+                                'timecompleted' => new external_value(PARAM_INT, 'completion status of the user', VALUE_OPTIONAL),
+                                'criteriatype' => new external_value(PARAM_INT, 'completion status of the user'),
+                                'module' => new external_value(PARAM_ALPHA, 'completion status of the user', VALUE_OPTIONAL),
+                                'moduleinstance' => new external_value(PARAM_INT, 'completion status of the user', VALUE_OPTIONAL),
+                                'gradepass' => new external_value(PARAM_FLOAT, 'completion status of the user', VALUE_OPTIONAL),
+                            )
+                        )
+                    )
+                )
+            )
+        );
+    }
+
 }

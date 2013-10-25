@@ -101,5 +101,14 @@ $functions = array(
         'type' => 'write',
         'capabilities' => 'report/completion:view',
     ),
+    'elediaservice_course_completion_simple' => array(
+        'classname' => 'eledia_services',
+        'methodname' => 'course_completion_simple',
+        'classpath' => 'local/eledia_webservicesuite/externallib.php',
+        'description' =>
+            'returns the completion information for the user with the given idnumber and the course with the given idnumber',
+        'type' => 'write',
+        'capabilities' => 'report/completion:view',
+    ),
 );
 

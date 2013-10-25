@@ -24,8 +24,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$plugin->version  = 2013092400;   // The (date) version of this plugin.
-$plugin->release = '0.1 (2013092400)';
+$plugin->version  = 2013102500;   // The (date) version of this plugin.
+$plugin->release = '0.1 (2013102500)';
 $plugin->requires  = 2013050100;        // Requires this Moodle version.
 $plugin->component = 'local_eledia_webservicesuite'; // Full name of the plugin (used for diagnostics).
 $plugin->maturity = MATURITY_STABLE;
