@@ -1150,10 +1150,6 @@ class eledia_services extends external_api {
      */
     public static function course_completion_parameters() {
         return new external_function_parameters(
-//            array(
-//                'useridnumber' => new external_value(PARAM_RAW, 'user idnumber'),
-//                'courseidnumber' => new external_value(PARAM_RAW, 'course idnumber'),
-//            )
             array(
                 'completion' =>
                 new external_multiple_structure(
@@ -1178,7 +1174,6 @@ class eledia_services extends external_api {
         global $CFG;
         require_once($CFG->dirroot."/local/eledia_webservicesuite/lib.php");
 
-//        self::validate_parameters(self::course_completion_parameters(), $params);
         self::validate_parameters(self::course_completion_parameters(), array('completion' => $params));
         $params = $params[0];//'completion'
 
@@ -1268,19 +1263,7 @@ class eledia_services extends external_api {
         global $CFG;
         require_once($CFG->dirroot."/local/eledia_webservicesuite/lib.php");
 
-ob_start();
-print_r($params);
-$debug_out = ob_get_contents();
-ob_end_clean();
-file_put_contents($CFG->dataroot."/webservice_debug.txt", $debug_out, FILE_APPEND);
-
         self::validate_parameters(self::course_completion_simple_parameters(), $params);
-
-ob_start();
-print_r($params);
-$debug_out = ob_get_contents();
-ob_end_clean();
-file_put_contents($CFG->dataroot."/webservice_debug.txt", $debug_out, FILE_APPEND);
 
         require_once($CFG->dirroot.'/lib/completionlib.php');
 
@@ -1343,5 +1326,4 @@ file_put_contents($CFG->dataroot."/webservice_debug.txt", $debug_out, FILE_APPEN
             )
         );
     }
-
 }
