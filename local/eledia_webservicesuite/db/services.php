@@ -38,7 +38,8 @@ $functions = array(
         'classname' => 'eledia_services',
         'methodname' => 'get_users_by_idnumber',
         'classpath' => 'local/eledia_webservicesuite/externallib.php',
-        'description' => 'returns a list of users object according to the given idnumbers',
+        'description' => 'returns a list of users object according to the given idnumbers
+            DEPRECATED: use core_user_get_users_by_field instead',
         'type' => 'write',
         'capabilities' => 'local/eledia_webservicesuite:access, moodle/user:viewdetails',
     ),
@@ -101,14 +102,4 @@ $functions = array(
         'type' => 'write',
         'capabilities' => 'report/completion:view',
     ),
-    'elediaservice_course_completion_simple' => array(
-        'classname' => 'eledia_services',
-        'methodname' => 'course_completion_simple',
-        'classpath' => 'local/eledia_webservicesuite/externallib.php',
-        'description' =>
-            'returns the completion information for the user with the given idnumber and the course with the given idnumber',
-        'type' => 'write',
-        'capabilities' => 'report/completion:view',
-    ),
 );
-

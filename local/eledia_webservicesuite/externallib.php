@@ -1175,7 +1175,7 @@ class eledia_services extends external_api {
         require_once($CFG->dirroot."/local/eledia_webservicesuite/lib.php");
 
         self::validate_parameters(self::course_completion_parameters(), array('completion' => $params));
-        $params = $params[0];//'completion'
+        $params = $params[0];
 
         require_once($CFG->dirroot.'/lib/completionlib.php');
 
