@@ -23,7 +23,7 @@
  * @package    local
  * @subpackage eledia_webservicesuite
  * @author     Benjamin Wolf <support@eledia.de>
- * @copyright  2013 eLeDia GmbH
+ * @copyright  2014 eLeDia GmbH
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -360,7 +360,7 @@ class eledia_services extends external_api {
                                     'Timezone code such as Australia/Perth, or 99 for default', VALUE_OPTIONAL),
                             'mailformat'  => new external_value(PARAM_INTEGER,
                                     'Mail format code is 0 for plain text, 1 for HTML etc', VALUE_OPTIONAL),
-                            'description' => new external_value(PARAM_TEXT, 'User profile description, no HTML', VALUE_OPTIONAL),
+                            'description' => new external_value(PARAM_RAW, 'User profile description, no HTML', VALUE_OPTIONAL),
                             'city'        => new external_value(PARAM_NOTAGS, 'Home city of the user', VALUE_OPTIONAL),
                             'country'     => new external_value(PARAM_ALPHA,
                                     'Home country code of the user, such as AU or CZ',

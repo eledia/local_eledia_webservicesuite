@@ -20,12 +20,30 @@
  * @package    local
  * @subpackage eledia_webservicesuite
  * @author     Benjamin Wolf <support@eledia.de>
- * @copyright  2013 eLeDia GmbH
+ * @copyright  2014 eLeDia GmbH
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'eLeDia webservices';
+$string['back'] = 'back';
+
 $string['eledia_webservicesuite:access'] = 'Access right for all functions of this web service';
+$string['eledia_desc_header'] = 'eledia webservicesuite';
+$string['eledia_desc'] = 'eledia webservicesuite';
+$string['eledia_header'] = 'eledia webservicesuite';
+
+$string['idnumbercourse'] = 'Course ID number';
+$string['idnumberuser'] = 'User ID number';
+
+$string['missing_token'] = 'Webservice token in plugin config is missing.';
+
+$string['pluginname'] = 'eledia webservicesuite';
+
+$string['start'] = 'call function';
+$string['service_choose'] = 'chose the service';
+
+$string['test_header'] = 'eledia webservicesuite service tester';
+$string['test_token'] = 'token for testscript';
+
 $string['wscannotenrol'] = 'Plugin instance cannot manually enrol a user in the course id = {$a->courseid}';
 $string['wsnoinstance'] = 'Manual enrolment plugin instance doesn\'t exist or is disabled for the course (id = {$a->courseid})';
 $string['wsusercannotassign'] = 'You don\'t have the permission to assign this role ({$a->roleid}) to this user ({$a->userid}) in this course({$a->courseid}).';
@@ -33,6 +51,5 @@ $string['wscoursenotfound'] = 'Course with idnumber = {$a->idnumber} not found.'
 $string['wsusernotfound'] = 'User with idnumber = {$a->idnumber} not found.';
 $string['wsmultiplecoursesfound'] = 'Found multiple courses with idnumber = {$a->idnumber}. Idnumber must be unique';
 $string['wsmultipleusersfound'] = 'Found multiple users with idnumber = {$a->idnumber}. Idnumber must be unique';
-
 $string['wsmultipleidnumbersfound'] = 'Idnumber {$a->idnumber} is not unique.';
 $string['wsidnumbersnotfound'] = 'Idnumber {$a->idnumber} not found.';

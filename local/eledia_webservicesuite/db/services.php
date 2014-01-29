@@ -20,7 +20,7 @@
  * @package    local
  * @subpackage eledia_webservicesuite
  * @author     Benjamin Wolf <support@eledia.de>
- * @copyright  2013 eLeDia GmbH
+ * @copyright  2014 eLeDia GmbH
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -30,7 +30,8 @@ $functions = array(
         'classname' => 'eledia_services',
         'methodname' => 'get_user_by_mail',
         'classpath' => 'local/eledia_webservicesuite/externallib.php',
-        'description' => 'returns a user object according to the given mail',
+        'description' => 'returns a user object according to the given mail
+            DEPRECATED: use core_user_get_users_by_field instead',
         'type' => 'write',
         'capabilities' => 'local/eledia_webservicesuite:access, moodle/user:viewdetails',
     ),
@@ -57,7 +58,7 @@ $functions = array(
         'classpath' => 'local/eledia_webservicesuite/externallib.php',
         'description' => 'enrols users in the given courses',
         'type' => 'write',
-        'capabilities' => 'local/eledia_webservicesuite:access, enrol/manual:enrol',
+        'capabilities' => 'local/eledia_webservicesuite:access, enrol/manual:enrol, moodle/role:assign',
     ),
     'elediaservice_get_courses_by_idnumber' => array(
         'classname' => 'eledia_services',
@@ -91,7 +92,7 @@ $functions = array(
         'classpath' => 'local/eledia_webservicesuite/externallib.php',
         'description' => 'unenrols a list of users from the the given enrolments in the given courses',
         'type' => 'write',
-        'capabilities' => 'local/eledia_webservicesuite:access, enrol/authorize:unenrol',
+        'capabilities' => 'local/eledia_webservicesuite:access, enrol/manual:unenrol',
     ),
     'elediaservice_course_completion' => array(
         'classname' => 'eledia_services',
@@ -103,3 +104,4 @@ $functions = array(
         'capabilities' => 'report/completion:view',
     ),
 );
+

@@ -20,12 +20,12 @@
  * @package    local
  * @subpackage eledia_webservicesuite
  * @author     Benjamin Wolf <support@eledia.de>
- * @copyright  2013 eLeDia GmbH
+ * @copyright  2014 eLeDia GmbH
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$plugin->version  = 2013110100;   // The (date) version of this plugin.
-$plugin->release = '0.1 (2013110100)';
+$plugin->version  = 2014012700;   // The (date) version of this plugin.
+$plugin->release = '0.2 (2014012700)';
 $plugin->requires  = 2013050100;        // Requires this Moodle version.
 $plugin->component = 'local_eledia_webservicesuite'; // Full name of the plugin (used for diagnostics).
 $plugin->maturity = MATURITY_STABLE;
