@@ -525,7 +525,6 @@ class eledia_services extends external_api {
 
             // Throw an exception if user is not able to assign the role.
             $roles = get_assignable_roles($context);
-
             if (!key_exists($enrolment['roleid'], $roles)) {
                 $errorparams = new stdClass();
                 $errorparams->roleid = $enrolment['roleid'];
@@ -569,7 +568,6 @@ class eledia_services extends external_api {
         }
 
         $transaction->allow_commit();
-
         return null;
     }
 

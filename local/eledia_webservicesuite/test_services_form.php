@@ -43,11 +43,11 @@ class test_services_form extends moodleform {
             $mform->addElement('static', 'missing_token', '', get_string('missing_token', 'local_eledia_webservicesuite'));
             return;
         }
-
+        $a = $CFG->wwwroot.'/admin/settings.php?section=webservicesoverview';
         $mform->addElement('header', '', get_string('eledia_desc_header', 'local_eledia_webservicesuite'), 'config_test_services');
-        $mform->addElement('static', 'desc', '', get_string('eledia_desc', 'local_eledia_webservicesuite'));
+        $mform->addElement('static', 'desc', '', get_string('eledia_desc', 'local_eledia_webservicesuite', $a));
 
-        $options = array('choose',
+        $options = array(get_string('choose'),
             'getCoursesByIdnumber' => 'elediaservice_get_courses_by_idnumber',
             'updateCoursesByIdnumber' => 'elediaservice_update_courses_by_idnumber',
             'enrolUsersByIdnumber' => 'elediaservice_enrol_users_by_idnumber',
@@ -124,15 +124,15 @@ class test_services_form extends moodleform {
                 break;
             case 'enrolUsersByIdnumber':
                 $mform->addElement('text', 'roleid', 'roleid',  'maxlength="100" size="50" ');
-                $mform->setType('roleid', PARAM_INT);
+                $mform->setType('roleid', PARAM_RAW);
                 $mform->addElement('text', 'uidnumber', get_string('idnumberuser', 'local_eledia_webservicesuite'),  'maxlength="100" size="50" ');
                 $mform->setType('uidnumber', PARAM_RAW);
                 $mform->addElement('text', 'cidnumber', get_string('idnumbercourse', 'local_eledia_webservicesuite'),  'maxlength="100" size="50" ');
                 $mform->setType('cidnumber', PARAM_RAW);
                 $mform->addElement('text', 'timestart', 'timestart',  'maxlength="10" size="11" ');
-                $mform->setType('timestart', PARAM_INT);
+                $mform->setType('timestart', PARAM_RAW);
                 $mform->addElement('text', 'timeend', 'timeend',  'maxlength="10" size="11" ');
-                $mform->setType('timeend', PARAM_INT);
+                $mform->setType('timeend', PARAM_RAW);
                 $mform->addElement('checkbox', 'suspend', 'suspend');
                 $mform->setDefault('suspend', false);
                 break;
@@ -171,7 +171,7 @@ class test_services_form extends moodleform {
                 $mform->addElement('text', 'lastname', get_string('lastname'), 'maxlength="100" size="50" ');
                 $mform->setType('lastname', PARAM_RAW);
                 $mform->addElement('text', 'email', get_string('email'), 'maxlength="100" size="25"');
-                $mform->setType('email', PARAM_NOTAGS);
+                $mform->setType('email', PARAM_RAW);
                 $mform->addElement('text', 'auth', get_string('authentication', 'admin'), 'maxlength="100" size="20" ');
                 $mform->setType('auth', PARAM_RAW);
                 $mform->addElement('text', 'lang', get_string('lang', 'admin'), 'maxlength="2" size="3" ');
@@ -184,7 +184,7 @@ class test_services_form extends moodleform {
                 $mform->setType('mailformat', PARAM_RAW);
                 $mform->addElement('editor', 'description', get_string('description'));
                 $mform->addElement('text', 'city', get_string('city'), 'maxlength="120" size="20"');
-                $mform->setType('city', PARAM_TEXT);
+                $mform->setType('city', PARAM_RAW);
                 $country = get_string_manager()->get_list_of_countries();
                 $default_country[''] = get_string('selectacountry');
                 $country = array_merge($default_country, $country);
@@ -309,12 +309,16 @@ class test_services_form extends moodleform {
         $mform =& $this->_form;
 
         $enrolment = new stdClass();
-        $enrolment->roleid = optional_param('roleid', 5, PARAM_INT);
+        $enrolment->roleid = optional_param('roleid', 5, PARAM_RAW);
         $enrolment->courseidnumber = optional_param('cidnumber', 0, PARAM_RAW);
         $enrolment->useridnumber = optional_param('uidnumber', 0, PARAM_RAW);
-        $enrolment->timestart = optional_param('timestart', time(), PARAM_INT);
+        $enrolment->timestart = optional_param('timestart', time(), PARAM_RAW);
         $enrolment->timeend = optional_param('timeend', 0, PARAM_INT);
         $enrolment->suspend = optional_param('suspend', 0, PARAM_BOOL);
+
+        if (empty($enrolment->courseidnumber)|| empty($enrolment->useridnumber) || empty($enrolment->roleid)) {
+            return;
+        }
 
         if (empty($enrolment->timestart)) {
             unset($enrolment->timestart);
@@ -347,6 +351,10 @@ class test_services_form extends moodleform {
         $enrolment->courseidnumber = optional_param('cidnumber', 0, PARAM_RAW);
         $enrolment->useridnumber = optional_param('uidnumber_u', 0, PARAM_RAW);
         $enrolment->enrolname = optional_param('enrolname', 0, PARAM_RAW);
+
+        if (empty($enrolment->courseidnumber) || empty($enrolment->useridnumber) || empty($enrolment->enrolname)) {
+            return;
+        }
 
         $msg = '';
         try {
@@ -477,7 +485,7 @@ class test_services_form extends moodleform {
 
     public function get_user_by_mail($client) {
         $mform =& $this->_form;
-
+return;
         // Build up mails array.
         $mails = optional_param('mails', 0, PARAM_RAW);
         // ToDo
@@ -504,22 +512,25 @@ class test_services_form extends moodleform {
 
         $user = new stdClass();
         $user->idnumber = optional_param('uidnumber', '', PARAM_RAW);
-        $user->username = optional_param('username', '', PARAM_USERNAME);
+        $user->username = optional_param('username', '', PARAM_RAW);
         $user->password = optional_param('password', '', PARAM_RAW);
         $user->firstname = optional_param('firstname', '', PARAM_RAW);
         $user->lastname = optional_param('lastname', '', PARAM_RAW);
-        $user->email = optional_param('email', '', PARAM_EMAIL);
+        $user->email = optional_param('email', '', PARAM_RAW);
         $user->auth = optional_param('auth', '', PARAM_RAW);
         $user->lang = optional_param('lang', '', PARAM_RAW);
         $user->theme = optional_param('theme', '', PARAM_RAW);
         $user->timezone = optional_param('timezone', '', PARAM_RAW);
         $user->mailformat = optional_param('mailformat', '', PARAM_RAW);
         $user->description = optional_param_array('description', '', PARAM_RAW);
-        $user->description = $user->description['text'];
+        if(!empty($user->description['text'])) {
+            $user->description = $user->description['text'];
+        } else{
+            unset($user->description);
+        }
         $user->city = optional_param('city', '', PARAM_RAW);
         $user->country = optional_param('country', '', PARAM_RAW);
 
-print_object($user);
         if (empty($user->idnumber)) {
             return;
         }

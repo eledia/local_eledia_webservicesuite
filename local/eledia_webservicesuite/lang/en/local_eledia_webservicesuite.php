@@ -28,7 +28,13 @@ $string['back'] = 'back';
 
 $string['eledia_webservicesuite:access'] = 'Access right for all functions of this web service';
 $string['eledia_desc_header'] = 'eledia webservicesuite';
-$string['eledia_desc'] = 'eledia webservicesuite';
+$string['eledia_desc'] = 'Fomular for testing the basic functions of the service.<br />
+    Be aware of the fact that the services you call here are all executed on the System.<br />
+<br />
+To use this formular you need to aktivate and configure the soap service.<br />
+You can find the generall webservice settinges here: <a href={$a}>{$a}</a><br />
+The token generated for the webservice user must be given in the config of this plugin.<br />
+<br />';
 $string['eledia_header'] = 'eledia webservicesuite';
 
 $string['idnumbercourse'] = 'Course ID number';
@@ -39,9 +45,9 @@ $string['missing_token'] = 'Webservice token in plugin config is missing.';
 $string['pluginname'] = 'eledia webservicesuite';
 
 $string['start'] = 'call function';
-$string['service_choose'] = 'chose the service';
+$string['service_choose'] = 'chose the function';
 
-$string['test_header'] = 'eledia webservicesuite service tester';
+$string['test_header'] = 'eledia webservicesuite function tester';
 $string['test_token'] = 'token for testscript';
 
 $string['wscannotenrol'] = 'Plugin instance cannot manually enrol a user in the course id = {$a->courseid}';
