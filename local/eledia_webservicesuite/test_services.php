@@ -19,7 +19,7 @@
  *
  * @package local
  * @category eledia_webservicesuite
- * @copyright 2013 eLeDia GmbH {@link http://www.eledia.de}
+ * @copyright 2014 eLeDia GmbH {@link http://www.eledia.de}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
@@ -32,7 +32,6 @@ require_capability('moodle/site:config', $context);
 $PAGE->set_context($context);
 
 $myurl = new moodle_url($FULLME);
-// $myurl->remove_params();
 
 $PAGE->set_url($myurl);
 $PAGE->set_pagelayout('course');
@@ -43,9 +42,7 @@ if ($mform->is_cancelled()) {
     redirect($CFG->httpswwwroot.'/index.php');
 }
 
-if ($formdata = $mform->get_data()) {
-
-}
+$formdata = $mform->get_data();
 
 $PAGE->navbar->add('test webservices');
 

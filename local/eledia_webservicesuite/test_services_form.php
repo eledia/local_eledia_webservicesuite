@@ -20,7 +20,7 @@
  * @package    local
  * @subpackage eledia_webservicesuite
  * @author     Benjamin Wolf <support@eledia.de>
- * @copyright  2013 eLeDia GmbH
+ * @copyright  2014 eLeDia GmbH
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -53,9 +53,8 @@ class test_services_form extends moodleform {
             'enrolUsersByIdnumber' => 'elediaservice_enrol_users_by_idnumber',
             'unenrolUsersByIdnumber' => 'elediaservice_unenrol_users_by_idnumber',
             'courseCompletion' => 'elediaservice_course_completion',
-//            'getUserByMail' => 'elediaservice_get_user_by_mail',
             'getUserByIdnumber' => 'elediaservice_get_user_by_idnumber',
-            'updateUsersByIdnumber' => 'elediaservice_update_users_by_idnumber',);
+            'updateUsersByIdnumber' => 'elediaservice_update_users_by_idnumber', );
         $attributes = 'onChange="M.core_formchangechecker.set_form_submitted(); this.form.submit();"';
         $mform->addElement('select', 'service_choose',
                 get_string('service_choose', 'local_eledia_webservicesuite'),
@@ -72,7 +71,8 @@ class test_services_form extends moodleform {
                 $mform->addElement('textarea', 'cidnumbers', get_string('idnumber'), 'wrap="virtual" rows="6" cols="100"');
                 break;
             case 'updateCoursesByIdnumber':
-                $mform->addElement('text', 'cidnumber', get_string('idnumbercourse', 'local_eledia_webservicesuite'),  'maxlength="100" size="50" ');
+                $mform->addElement('text', 'cidnumber',
+                        get_string('idnumbercourse', 'local_eledia_webservicesuite'),  'maxlength="100" size="50" ');
                 $mform->setType('cidnumber', PARAM_RAW);
                 $mform->addElement('text', 'fullname', 'fullname',  'maxlength="100" size="50" ');
                 $mform->setType('fullname', PARAM_RAW);
@@ -125,9 +125,11 @@ class test_services_form extends moodleform {
             case 'enrolUsersByIdnumber':
                 $mform->addElement('text', 'roleid', 'roleid',  'maxlength="100" size="50" ');
                 $mform->setType('roleid', PARAM_RAW);
-                $mform->addElement('text', 'uidnumber', get_string('idnumberuser', 'local_eledia_webservicesuite'),  'maxlength="100" size="50" ');
+                $mform->addElement('text', 'uidnumber',
+                        get_string('idnumberuser', 'local_eledia_webservicesuite'),  'maxlength="100" size="50" ');
                 $mform->setType('uidnumber', PARAM_RAW);
-                $mform->addElement('text', 'cidnumber', get_string('idnumbercourse', 'local_eledia_webservicesuite'),  'maxlength="100" size="50" ');
+                $mform->addElement('text', 'cidnumber',
+                        get_string('idnumbercourse', 'local_eledia_webservicesuite'),  'maxlength="100" size="50" ');
                 $mform->setType('cidnumber', PARAM_RAW);
                 $mform->addElement('text', 'timestart', 'timestart',  'maxlength="10" size="11" ');
                 $mform->setType('timestart', PARAM_RAW);
@@ -137,30 +139,32 @@ class test_services_form extends moodleform {
                 $mform->setDefault('suspend', false);
                 break;
             case 'unenrolUsersByIdnumber':
-                $mform->addElement('text', 'uidnumber_u', get_string('idnumberuser', 'local_eledia_webservicesuite'), 'maxlength="100" size="50" ');
+                $mform->addElement('text', 'uidnumber_u',
+                        get_string('idnumberuser', 'local_eledia_webservicesuite'), 'maxlength="100" size="50" ');
                 $mform->setType('uidnumber_u', PARAM_RAW);
-                $mform->addElement('text', 'cidnumber', get_string('idnumbercourse', 'local_eledia_webservicesuite'), 'maxlength="100" size="50" ');
+                $mform->addElement('text', 'cidnumber',
+                        get_string('idnumbercourse', 'local_eledia_webservicesuite'), 'maxlength="100" size="50" ');
                 $mform->setType('cidnumber', PARAM_RAW);
                 $mform->addElement('text', 'enrolname', 'enrolment methode',  'maxlength="10" size="11" ');
                 $mform->setType('enrolname', PARAM_RAW);
                 $mform->setDefault('enrolname', 'manual');
                 break;
             case 'courseCompletion':
-                $mform->addElement('text', 'uidnumber', get_string('idnumberuser', 'local_eledia_webservicesuite'), 'maxlength="100" size="50" ');
+                $mform->addElement('text', 'uidnumber',
+                        get_string('idnumberuser', 'local_eledia_webservicesuite'), 'maxlength="100" size="50" ');
                 $mform->setType('uidnumber', PARAM_RAW);
-                $mform->addElement('text', 'cidnumber', get_string('idnumbercourse', 'local_eledia_webservicesuite'), 'maxlength="100" size="50" ');
+                $mform->addElement('text', 'cidnumber',
+                        get_string('idnumbercourse', 'local_eledia_webservicesuite'), 'maxlength="100" size="50" ');
                 $mform->setType('cidnumber', PARAM_RAW);
                 break;
-//            case 'getUserByMail':
-//                $mform->addElement('text', 'email', 'email',  'maxlength="100" size="50" ');
-//                $mform->setType('email', PARAM_EMAIL);
-//                break;
             case 'getUserByIdnumber':
-                $mform->addElement('text', 'uidnumber', get_string('idnumberuser', 'local_eledia_webservicesuite'), 'maxlength="100" size="50" ');
+                $mform->addElement('text', 'uidnumber',
+                        get_string('idnumberuser', 'local_eledia_webservicesuite'), 'maxlength="100" size="50" ');
                 $mform->setType('uidnumber', PARAM_RAW);
                 break;
             case 'updateUsersByIdnumber':
-                $mform->addElement('text', 'uidnumber', get_string('idnumberuser', 'local_eledia_webservicesuite'), 'maxlength="100" size="50" ');
+                $mform->addElement('text', 'uidnumber',
+                        get_string('idnumberuser', 'local_eledia_webservicesuite'), 'maxlength="100" size="50" ');
                 $mform->setType('uidnumber', PARAM_RAW);
                 $mform->addElement('text', 'username', get_string('username'), 'maxlength="100" size="20"');
                 $mform->setType('username', PARAM_NOTAGS);
@@ -191,7 +195,6 @@ class test_services_form extends moodleform {
                 $mform->addElement('select', 'country', get_string('country'), $country);
                 break;
             default:
-//$mform->addElement('static', 'desc', '', $service_choose);
                 break;
         }
 
@@ -203,7 +206,7 @@ class test_services_form extends moodleform {
         global $CFG;
         $mform =& $this->_form;
 
-        if($mform->isSubmitted()){
+        if ($mform->isSubmitted()) {
             $service_choose = optional_param('service_choose', 0, PARAM_ALPHANUM);
             if (empty($service_choose)) {
                 return;
@@ -234,9 +237,6 @@ class test_services_form extends moodleform {
                 case 'getUserByIdnumber':
                     $this->get_user_by_idnumber($client);
                     break;
-//                case 'getUserByMail':
-//                    $this->get_user_by_mail($client);
-//                    break;
                 case 'updateUsersByIdnumber':
                     $this->update_users_by_idnumber($client);
                     break;
@@ -253,7 +253,7 @@ class test_services_form extends moodleform {
 
         try {
             $client = new SoapClient(
-                    NULL,
+                    null,
                     array(
                             "location" => $CFG->wwwroot.'/webservice/soap/server.php?wstoken='.$token,
                             "uri" => "urn:xmethods-delayed-quotes",
@@ -262,7 +262,7 @@ class test_services_form extends moodleform {
                             'trace' => 1
                     )
             );
-        } catch (exception $e){
+        } catch (exception $e) {
             $mform =& $this->_form;
             $msg = '<br />Error:<br />';
             $msg .= $exc->getMessage();
@@ -278,7 +278,7 @@ class test_services_form extends moodleform {
         $mform =& $this->_form;
 
         $cidnumbers = optional_param('cidnumbers', 0, PARAM_RAW);
-        $id_array =  array();
+        $id_array = array();
         if (empty($cidnumbers)) {
             return;
         } else {
@@ -401,7 +401,8 @@ class test_services_form extends moodleform {
         $course->completionnotify = optional_param('completionnotify', 0, PARAM_RAW);
         $course->lang = optional_param('lang', 0, PARAM_RAW);
         $course->forcetheme = optional_param('forcetheme', 0, PARAM_RAW);
-        $course->courseformatoptions = array(array('name' => optional_param('courseformatoption_name', 0, PARAM_RAW), 'value' => optional_param('courseformatoption_value', 0, PARAM_RAW)));
+        $course->courseformatoptions = array(array('name' => optional_param('courseformatoption_name', 0, PARAM_RAW),
+            'value' => optional_param('courseformatoption_value', 0, PARAM_RAW)));
 
         if (empty($course->idnumber)) {
             return;
@@ -442,7 +443,8 @@ class test_services_form extends moodleform {
 
         $msg = '';
         try {
-            $result = $client->elediaservice_course_completion(array(array('useridnumber' => $eledia_uidnumber , 'courseidnumber' => $eledia_cidnumber)));
+            $result = $client->elediaservice_course_completion(array(
+                array('useridnumber' => $eledia_uidnumber , 'courseidnumber' => $eledia_cidnumber)));
         } catch (Exception $exc) {
             $msg .= $exc->getMessage();
             $mform->addElement('static', 'service_response', '', $msg);
@@ -483,30 +485,6 @@ class test_services_form extends moodleform {
         $mform->addElement('static', 'service_response', '', $msg);
     }
 
-    public function get_user_by_mail($client) {
-        $mform =& $this->_form;
-return;
-        // Build up mails array.
-        $mails = optional_param('mails', 0, PARAM_RAW);
-        // ToDo
-
-        $msg = '';
-        try {
-            $result = $client->elediaservice_get_user_by_mail($mails);
-        } catch (Exception $exc) {
-            $msg .= $exc->getMessage();
-            $mform->addElement('static', 'service_response', '', $msg);
-            return;
-        }
-
-        ob_start();
-        print_object($result);
-        $result_str = ob_get_contents();
-        ob_end_clean();
-        $msg .= $result_str;
-        $mform->addElement('static', 'service_response', '', $msg);
-    }
-
     public function update_users_by_idnumber($client) {
         $mform =& $this->_form;
 
@@ -523,9 +501,9 @@ return;
         $user->timezone = optional_param('timezone', '', PARAM_RAW);
         $user->mailformat = optional_param('mailformat', '', PARAM_RAW);
         $user->description = optional_param_array('description', '', PARAM_RAW);
-        if(!empty($user->description['text'])) {
+        if (!empty($user->description['text'])) {
             $user->description = $user->description['text'];
-        } else{
+        } else {
             unset($user->description);
         }
         $user->city = optional_param('city', '', PARAM_RAW);

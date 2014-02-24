@@ -1,4 +1,4 @@
-This plugin provides new webservice function for moodle.
+This plugin provides new webservice functions for moodle.
 
 Installation:
 To install the plugin just copy the folder "eledia_webservicesuite" into moodle/local/.

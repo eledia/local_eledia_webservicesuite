@@ -1,4 +1,27 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ *
+ * @package    local
+ * @subpackage eledia_webservicesuite
+ * @author     Benjamin Wolf <support@eledia.de>
+ * @copyright  2014 eLeDia GmbH
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 require(dirname(dirname(dirname(__FILE__))).'/config.php');
 
@@ -14,7 +37,7 @@ $token = $config->test_token;
 
 try {
     $client = new SoapClient(
-            NULL,
+            null,
             array(
                     "location" => $CFG->wwwroot.'/webservice/soap/server.php?wstoken='.$token,
                     "uri" => "urn:xmethods-delayed-quotes",
@@ -23,7 +46,7 @@ try {
                     'trace' => 1
             )
     );
-} catch (exception $e){
+} catch (exception $e) {
     mtrace('<br />Error:<br />');
     mtrace($exc->getMessage());
     mtrace('<br />response: <br />');
@@ -31,7 +54,7 @@ try {
     exit;
 }
 
-// Create Testuser
+// Create Testuser.
 $testuser = 'testerxforwebservice';
 $user = $DB->get_record('user', array('username' => $testuser));
 if (empty($user)) {
@@ -87,11 +110,6 @@ try {
     mtrace('<br />response: <br />');
     mtrace($client->__getLastResponse());
 }
-//ob_start();
-//print_object($user_by_mail);
-//$debug_out = ob_get_contents();
-//ob_end_clean();
-//mtrace('Result: '.$debug_out);
 
 // Test get_users_by_idnumber.
 mtrace('Test get_users_by_idnumber');
@@ -104,11 +122,6 @@ try {
     mtrace('<br />response: <br />');
     mtrace($client->__getLastResponse());
 }
-//ob_start();
-//print_object($users_by_idnumber);
-//$debug_out = ob_get_contents();
-//ob_end_clean();
-//mtrace('Result: '.$debug_out);
 
 // Test update_users_by_idnumber.
 mtrace('Test update_users_by_idnumber -> update firstname to b');
@@ -134,10 +147,5 @@ try {
     mtrace('<br />response: <br />');
     mtrace($client->__getLastResponse());
 }
-//ob_start();
-//print_object($user_by_idnumber);
-//$debug_out = ob_get_contents();
-//ob_end_clean();
-//mtrace('Result: '.$debug_out);
 
 user_delete_user($user);

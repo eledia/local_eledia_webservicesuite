@@ -16,11 +16,11 @@
 
 /**
  *
- *
- * @package local
- * @category eledia_ldap_confirm
- * @copyright 2013 eLeDia GmbH {@link http://www.eledia.de}
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    local
+ * @subpackage eledia_webservicesuite
+ * @author     Benjamin Wolf <support@eledia.de>
+ * @copyright  2014 eLeDia GmbH
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die;
@@ -31,7 +31,8 @@ if ($hassiteconfig) {
 
     $configs = array();
 
-    $configs[] = new admin_setting_configtext('test_token', get_string('test_token', 'local_eledia_webservicesuite'), '', '', PARAM_RAW, 40);
+    $configs[] = new admin_setting_configtext('test_token',
+            get_string('test_token', 'local_eledia_webservicesuite'), '', '', PARAM_RAW, 40);
 
     foreach ($configs as $config) {
         $config->plugin = 'local_eledia_webservicesuite';

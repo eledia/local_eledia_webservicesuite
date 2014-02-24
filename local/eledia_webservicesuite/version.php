@@ -26,6 +26,6 @@
 
 $plugin->version  = 2014012700;   // The (date) version of this plugin.
 $plugin->release = '0.2 (2014012700)';
-$plugin->requires  = 2013050100;        // Requires this Moodle version.
+$plugin->requires  = 2013101800;        // Requires this Moodle version.
 $plugin->component = 'local_eledia_webservicesuite'; // Full name of the plugin (used for diagnostics).
 $plugin->maturity = MATURITY_STABLE;
