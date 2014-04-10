@@ -55,7 +55,7 @@ class eledia_services extends external_api {
      * @throws {moodle_exception}
      */
     public static function get_user_by_mail($mails) {
-        global $DB, $CFG;
+        global $DB, $CFG, $USER;
 
         require_once($CFG->dirroot . "/user/lib.php");
         self::validate_parameters(self::get_user_by_mail_parameters(), array('mails' => $mails));
@@ -74,7 +74,7 @@ class eledia_services extends external_api {
                 continue;
             }
             context_instance_preload($user);
-            $usercontext = get_context_instance(CONTEXT_USER, $user->id);
+            $usercontext = CONTEXT_USER::instance($user->id);
             self::validate_context($usercontext);
             $currentuser = ($user->id == $USER->id);
             if ($userarray  = user_get_user_details($user)) {
@@ -221,7 +221,7 @@ class eledia_services extends external_api {
                 continue;
             }
             context_instance_preload($user);
-            $usercontext = get_context_instance(CONTEXT_USER, $user->id);
+            $usercontext = CONTEXT_USER::instance($user->id);
             self::validate_context($usercontext);
             $currentuser = ($user->id == $USER->id);
 
@@ -398,7 +398,7 @@ class eledia_services extends external_api {
         require_once($CFG->dirroot."/local/eledia_webservicesuite/lib.php");
 
         // Ensure the current user is allowed to run this function.
-        $context = get_context_instance(CONTEXT_SYSTEM);
+        $context = CONTEXT_SYSTEM::instance();
         require_capability('moodle/user:update', $context);
         self::validate_context($context);
 
@@ -517,7 +517,7 @@ class eledia_services extends external_api {
             $enrolment['userid'] = $local_user->id;
 
             // Ensure the current user is allowed to run this function in the enrolment context.
-            $context = get_context_instance(CONTEXT_COURSE, $enrolment['courseid']);
+            $context = CONTEXT_COURSE::instance($enrolment['courseid']);
             self::validate_context($context);
 
             // Check that the user has the permission to manual enrol.
@@ -989,7 +989,7 @@ class eledia_services extends external_api {
         $hasuserupdatecap = has_capability('moodle/user:update', get_system_context());
 
         context_instance_preload($user);
-        $usercontext = get_context_instance(CONTEXT_USER, $user->id);
+        $usercontext = CONTEXT_USER::instance($user->id);
         self::validate_context($usercontext);
         $currentuser = ($user->id == $USER->id);
 
