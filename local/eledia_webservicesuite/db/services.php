@@ -25,25 +25,6 @@
  */
 
 $functions = array(
-
-    'elediaservice_get_user_by_mail' => array(
-        'classname' => 'eledia_services',
-        'methodname' => 'get_user_by_mail',
-        'classpath' => 'local/eledia_webservicesuite/externallib.php',
-        'description' => 'returns a user object according to the given mail
-            DEPRECATED: use core_user_get_users_by_field instead',
-        'type' => 'write',
-        'capabilities' => 'local/eledia_webservicesuite:access, moodle/user:viewdetails',
-    ),
-    'elediaservice_get_users_by_idnumber' => array(
-        'classname' => 'eledia_services',
-        'methodname' => 'get_users_by_idnumber',
-        'classpath' => 'local/eledia_webservicesuite/externallib.php',
-        'description' => 'returns a list of users object according to the given idnumbers
-            DEPRECATED: use core_user_get_users_by_field instead',
-        'type' => 'write',
-        'capabilities' => 'local/eledia_webservicesuite:access, moodle/user:viewdetails',
-    ),
     'elediaservice_update_users_by_idnumber' => array(
         'classname' => 'eledia_services',
         'methodname' => 'update_users_by_idnumber',
@@ -90,7 +71,7 @@ $functions = array(
         'classname' => 'eledia_services',
         'methodname' => 'unenrol_users_by_idnumber',
         'classpath' => 'local/eledia_webservicesuite/externallib.php',
-        'description' => 'unenrols a list of users from the the given enrolments in the given courses',
+        'description' => 'unenrols a list of users from the given enrolment in the given courses',
         'type' => 'write',
         'capabilities' => 'local/eledia_webservicesuite:access, enrol/manual:unenrol',
     ),
@@ -102,6 +83,24 @@ $functions = array(
             'returns the completion information for the user with the given idnumber and the course with the given idnumber',
         'type' => 'write',
         'capabilities' => 'report/completion:view',
+    ),
+    'elediaservice_get_user_by_mail' => array(
+        'classname' => 'eledia_services',
+        'methodname' => 'get_user_by_mail',
+        'classpath' => 'local/eledia_webservicesuite/externallib.php',
+        'description' => 'returns a user object according to the given mail
+            DEPRECATED: use core_user_get_users_by_field instead',
+        'type' => 'write',
+        'capabilities' => 'local/eledia_webservicesuite:access, moodle/user:viewdetails',
+    ),
+    'elediaservice_get_users_by_idnumber' => array(
+        'classname' => 'eledia_services',
+        'methodname' => 'get_users_by_idnumber',
+        'classpath' => 'local/eledia_webservicesuite/externallib.php',
+        'description' => 'returns a list of users object according to the given idnumbers
+            DEPRECATED: use core_user_get_users_by_field instead',
+        'type' => 'write',
+        'capabilities' => 'local/eledia_webservicesuite:access, moodle/user:viewdetails',
     ),
 );
 

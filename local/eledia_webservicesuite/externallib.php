@@ -1222,13 +1222,13 @@ class eledia_services extends external_api {
                     'criteria_list'       => new external_multiple_structure(
                         new external_single_structure(
                             array(
-                                'criteriaid' => new external_value(PARAM_INT, 'completion status of the user'),
-                                'gradefinal' => new external_value(PARAM_FLOAT, 'completion status of the user', VALUE_OPTIONAL),
-                                'timecompleted' => new external_value(PARAM_INT, 'completion status of the user', VALUE_OPTIONAL),
-                                'criteriatype' => new external_value(PARAM_INT, 'completion status of the user'),
-                                'module' => new external_value(PARAM_ALPHA, 'completion status of the user', VALUE_OPTIONAL),
-                                'moduleinstance' => new external_value(PARAM_INT, 'completion status of the user', VALUE_OPTIONAL),
-                                'gradepass' => new external_value(PARAM_FLOAT, 'completion status of the user', VALUE_OPTIONAL),
+                                'criteriaid' => new external_value(PARAM_INT, 'id of the criteria'),
+                                'gradefinal' => new external_value(PARAM_FLOAT, 'final grade of the criteria', VALUE_OPTIONAL),
+                                'timecompleted' => new external_value(PARAM_INT, 'timestamp of criteria completion', VALUE_OPTIONAL),
+                                'criteriatype' => new external_value(PARAM_INT, 'type of the criteria'),
+                                'module' => new external_value(PARAM_ALPHA, 'modul id', VALUE_OPTIONAL),
+                                'moduleinstance' => new external_value(PARAM_INT, 'modul instance id', VALUE_OPTIONAL),
+                                'gradepass' => new external_value(PARAM_FLOAT, 'the grade to pass', VALUE_OPTIONAL),
                             )
                         )
                     )
@@ -1310,13 +1310,13 @@ class eledia_services extends external_api {
                     'criteria_list'       => new external_multiple_structure(
                         new external_single_structure(
                             array(
-                                'criteriaid' => new external_value(PARAM_INT, 'completion status of the user'),
-                                'gradefinal' => new external_value(PARAM_FLOAT, 'completion status of the user', VALUE_OPTIONAL),
-                                'timecompleted' => new external_value(PARAM_INT, 'completion status of the user', VALUE_OPTIONAL),
-                                'criteriatype' => new external_value(PARAM_INT, 'completion status of the user'),
-                                'module' => new external_value(PARAM_ALPHA, 'completion status of the user', VALUE_OPTIONAL),
-                                'moduleinstance' => new external_value(PARAM_INT, 'completion status of the user', VALUE_OPTIONAL),
-                                'gradepass' => new external_value(PARAM_FLOAT, 'completion status of the user', VALUE_OPTIONAL),
+                                'criteriaid' => new external_value(PARAM_INT, 'id of the criteria'),
+                                'gradefinal' => new external_value(PARAM_FLOAT, 'final grade of the criteria', VALUE_OPTIONAL),
+                                'timecompleted' => new external_value(PARAM_INT, 'timestamp of criteria completion', VALUE_OPTIONAL),
+                                'criteriatype' => new external_value(PARAM_INT, 'type of the criteria'),
+                                'module' => new external_value(PARAM_ALPHA, 'modul id', VALUE_OPTIONAL),
+                                'moduleinstance' => new external_value(PARAM_INT, 'modul instance id', VALUE_OPTIONAL),
+                                'gradepass' => new external_value(PARAM_FLOAT, 'the grade to pass', VALUE_OPTIONAL),
                             )
                         )
                     )
