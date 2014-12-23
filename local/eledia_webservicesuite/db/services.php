@@ -102,5 +102,13 @@ $functions = array(
         'type' => 'write',
         'capabilities' => 'local/eledia_webservicesuite:access, moodle/user:viewdetails',
     ),
+    'elediaservice_create_users' => array(
+        'classname' => 'eledia_services',
+        'methodname' => 'create_users',
+        'classpath' => 'local/eledia_webservicesuite/externallib.php',
+        'description' => 'Create one or more users. With a param to set user password updated or not.',
+        'type' => 'write',
+        'capabilities' => 'local/eledia_webservicesuite:access, moodle/user:create',
+    ),
 );
 

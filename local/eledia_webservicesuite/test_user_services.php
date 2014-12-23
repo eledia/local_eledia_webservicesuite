@@ -48,7 +48,7 @@ try {
     );
 } catch (exception $e) {
     mtrace('<br />Error:<br />');
-    mtrace($exc->getMessage());
+    mtrace($e->getMessage());
     mtrace('<br />response: <br />');
     mtrace($client->__getLastResponse());
     exit;
