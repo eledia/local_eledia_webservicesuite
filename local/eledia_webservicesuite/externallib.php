@@ -1337,7 +1337,6 @@ class eledia_services extends external_api {
 
         return new external_function_parameters(
             array(
-                'update_password' => new external_value(PARAM_BOOL, 'Should user passwords be updated'),
                 'users' => new external_multiple_structure(
                     new external_single_structure(
                         array(
@@ -1349,6 +1348,8 @@ class eledia_services extends external_api {
                                 new external_value(PARAM_NOTAGS, 'The first name(s) of the user'),
                             'lastname' =>
                                 new external_value(PARAM_NOTAGS, 'The family name of the user'),
+                            'update_password' =>
+                                new external_value(PARAM_BOOL, 'Should user passwords be updated'),
                             'email' =>
                                 new external_value(PARAM_EMAIL, 'A valid and unique email address'),
                             'auth' =>
@@ -1429,7 +1430,7 @@ class eledia_services extends external_api {
 
         // Do basic automatic PARAM checks on incoming data, using params description.
         // If any problems are found then exceptions are thrown with helpful error messages.
-        $params = self::validate_parameters(self::create_users_parameters(), $users);
+        $params = self::validate_parameters(self::create_users_parameters(), array('users' => $users));
 
         $availableauths  = core_component::get_plugin_list('auth');
         unset($availableauths['mnet']);       // These would need mnethostid too.
@@ -1477,12 +1478,7 @@ class eledia_services extends external_api {
                 throw new invalid_parameter_exception('Email address already exists: '.$user['email']);
             }
             // End of user info validation.
-ob_start();
-echo 'user:';
-print_r($user);
-$debug_out = ob_get_contents();
-ob_end_clean();
-file_put_contents($CFG->dataroot."/webservice_debug.txt", $debug_out, FILE_APPEND);
+
             // Create the user data now!
            $user['id'] = user_create_user($user, $params['update_password'], false);
 
