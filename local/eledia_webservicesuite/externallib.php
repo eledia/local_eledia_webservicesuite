@@ -1480,7 +1480,7 @@ class eledia_services extends external_api {
             // End of user info validation.
 
             // Create the user data now!
-           $user['id'] = user_create_user($user, $params['update_password'], false);
+           $user['id'] = user_create_user($user, $user['update_password'], false);
 
 
             // Custom fields.
