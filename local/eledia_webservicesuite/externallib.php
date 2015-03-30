@@ -525,7 +525,7 @@ class eledia_services extends external_api {
         if (empty($enrol)) {
             $output['result'] = get_string('manualpluginnotinstalled', 'enrol_manual');
             $output['success'] = false;
-            return $output;
+            return array($output);
         }
 
         foreach ($params['enrolments'] as $enrolment) {
@@ -561,7 +561,9 @@ class eledia_services extends external_api {
                 $errorparams->roleid = $enrolment['roleid'];
                 $errorparams->courseid = $enrolment['courseid'];
                 $errorparams->userid = $enrolment['userid'];
-                throw new moodle_exception('wsusercannotassign', 'local_eledia_webservicesuite', '', $errorparams);
+                $output['result'] = get_string('wsusercannotassign', 'local_eledia_webservicesuite', $errorparams);
+                $output['success'] = false;
+                return array($output);
             }
 
             // Check manual enrolment plugin instance is enabled/exist.
@@ -575,7 +577,9 @@ class eledia_services extends external_api {
             if (empty($instance)) {
                 $errorparams = new stdClass();
                 $errorparams->courseid = $enrolment['courseid'];
-                throw new moodle_exception('wsnoinstance', 'local_eledia_webservicesuite', $errorparams);
+                $output['result'] = get_string('wsnoinstance', 'local_eledia_webservicesuite', $errorparams);
+                $output['success'] = false;
+                return array($output);
             }
 
             // Check that the plugin accept enrolment (it should always the case, it's hard coded in the plugin).
@@ -584,7 +588,9 @@ class eledia_services extends external_api {
                 $errorparams->roleid = $enrolment['roleid'];
                 $errorparams->courseid = $enrolment['courseid'];
                 $errorparams->userid = $enrolment['userid'];
-                throw new moodle_exception('wscannotenrol', 'local_eledia_webservicesuite', '', $errorparams);
+                $output['result'] = get_string('wscannotenrol', 'local_eledia_webservicesuite', $errorparams);
+                $output['success'] = false;
+                return array($output);
             }
 
             // Finally proceed the enrolment.
@@ -600,7 +606,7 @@ class eledia_services extends external_api {
         $transaction->allow_commit();
         $output['result'] = 'success';
         $output['success'] = true;
-        return $output;
+        return array($output);
     }
 
     /**
@@ -990,7 +996,7 @@ class eledia_services extends external_api {
 
         $output['result'] = 'success';
         $output['success'] = true;
-        return $output;
+        return array($output);
     }
 
     /**
@@ -1197,7 +1203,7 @@ class eledia_services extends external_api {
 
         $output['result'] = 'success';
         $output['success'] = true;
-        return $output;
+        return array($output);
     }
 
     /**
