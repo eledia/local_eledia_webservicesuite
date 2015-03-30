@@ -403,15 +403,26 @@ class eledia_services extends external_api {
         self::validate_context($context);
 
         $params = self::validate_parameters(self::update_users_by_idnumber_parameters(), array('users' => $users));
-
         $transaction = $DB->start_delegated_transaction();
+        $output = array();
 
         foreach ($params['users'] as $user) {
             // Get user by idnumber & check for unique & existing idnumbers.
-            $local_user = get_record_by_idnumber('user', $user['idnumber'], true, true, 'wsusernotfound', 'wsmultipleusersfound');
+            try {
+                $local_user = get_record_by_idnumber('user', $user['idnumber'], true, true, 'wsusernotfound', 'wsmultipleusersfound');
+            } catch (Exception $exc) {
+                $output['result'] .= $exc->getMessage()."\n";
+                continue;
+            }
             $user['id'] = $local_user->id;
 
-            user_update_user($user);
+            try {
+                user_update_user($user);
+            } catch (Exception $exc) {
+                $output['result'] .= $exc->getMessage()."\n";
+                continue;
+            }
+
             // Update user custom fields.
             if (!empty($user['customfields'])) {
 
@@ -420,20 +431,31 @@ class eledia_services extends external_api {
                     // Profile_save_data() saves profile file.
                     // It's expecting a user with the correct id, and custom field to be named profile_field_"shortname".
                 }
-                profile_save_data((object) $user);
+                try {
+                    profile_save_data((object) $user);
+                } catch (Exception $exc) {
+                    $output['result'] .= $exc->getMessage()."\n";
+                }
             }
 
             // Preferences.
             if (!empty($user['preferences'])) {
                 foreach ($user['preferences'] as $preference) {
-                    set_user_preference($preference['type'], $preference['value'], $user['id']);
+                    try {
+                        set_user_preference($preference['type'], $preference['value'], $user['id']);
+                    } catch (Exception $exc) {
+                        $output['result'] .= $exc->getMessage()."\n";
+                    }
                 }
             }
+            $output['result'] .= 'user '.$local_user->username." updated \n";
         }
 
         $transaction->allow_commit();
 
-        return null;
+        $output['result'] .= 'success';
+        $output['success'] = true;
+        return array($output);
     }
 
     /**
@@ -441,7 +463,14 @@ class eledia_services extends external_api {
      * @return external_description
      */
     public static function update_users_by_idnumber_returns() {
-        return null;
+        return new external_multiple_structure(
+            new external_single_structure(
+                array(
+                    'success'   => new external_value(PARAM_BOOL, 'Return success of operation true or false'),
+                    'result'    => new external_value(PARAM_RAW, 'Return message'),
+                )
+            )
+        );
     }
 
 
@@ -494,7 +523,9 @@ class eledia_services extends external_api {
         // Retrieve the manual enrolment plugin.
         $enrol = enrol_get_plugin('manual');
         if (empty($enrol)) {
-            throw new moodle_exception('manualpluginnotinstalled', 'enrol_manual');
+            $output['result'] = get_string('manualpluginnotinstalled', 'enrol_manual');
+            $output['success'] = false;
+            return $output;
         }
 
         foreach ($params['enrolments'] as $enrolment) {
@@ -564,11 +595,12 @@ class eledia_services extends external_api {
 
             $enrol->enrol_user($instance, $enrolment['userid'], $enrolment['roleid'],
                     $enrolment['timestart'], $enrolment['timeend'], $enrolment['status']);
-
         }
 
         $transaction->allow_commit();
-        return null;
+        $output['result'] = 'success';
+        $output['success'] = true;
+        return $output;
     }
 
     /**
@@ -576,7 +608,14 @@ class eledia_services extends external_api {
      * @return null
      */
     public static function enrol_users_by_idnumber_returns() {
-        return null;// Enrol user function does not give us a success or not information.
+        return new external_multiple_structure(
+            new external_single_structure(
+                array(
+                    'success'   => new external_value(PARAM_BOOL, 'Return success of operation true or false'),
+                    'result'    => new external_value(PARAM_RAW, 'Return message'),
+                )
+            )
+        );
     }
 
     /**
@@ -627,6 +666,8 @@ class eledia_services extends external_api {
 
         // Create return value.
         $coursesinfo = array();
+        $coursesinfo[0]['result'] = '';
+        $coursesinfo[0]['success'] = false;
         foreach ($courses as $idnumber => $course) {
 
             // If course not found, set info text.
@@ -702,6 +743,8 @@ class eledia_services extends external_api {
                  $coursesinfo[$idnumber] = $courseinfo;
             }
         }
+        $coursesinfo[0]['result'] = 'success';
+        $coursesinfo[0]['success'] = true;
         return $coursesinfo;
     }
 
@@ -714,6 +757,8 @@ class eledia_services extends external_api {
         return new external_multiple_structure(
                 new external_single_structure(
                         array(
+                            'success'   => new external_value(PARAM_BOOL, 'Return success of operation true or false', VALUE_OPTIONAL),
+                            'result'    => new external_value(PARAM_RAW, 'Return message', VALUE_OPTIONAL),
                             'msg' => new external_value(PARAM_TEXT, 'error msg', VALUE_OPTIONAL),
                             'id' => new external_value(PARAM_INT, 'course id', VALUE_OPTIONAL),
                             'shortname' => new external_value(PARAM_TEXT, 'course short name', VALUE_OPTIONAL),
@@ -779,7 +824,6 @@ class eledia_services extends external_api {
                              ),
                         ), 'course'
                 )
-
         );
     }
 
@@ -944,7 +988,9 @@ class eledia_services extends external_api {
 
         $transaction->allow_commit();
 
-        return null;
+        $output['result'] = 'success';
+        $output['success'] = true;
+        return $output;
     }
 
     /**
@@ -953,7 +999,14 @@ class eledia_services extends external_api {
      * @return external_description
      */
     public static function update_courses_by_idnumber_returns() {
-        return null;
+        return new external_multiple_structure(
+            new external_single_structure(
+                array(
+                    'success'   => new external_value(PARAM_BOOL, 'Return success of operation true or false'),
+                    'result'    => new external_value(PARAM_RAW, 'Return message'),
+                )
+            )
+        );
     }
 
 
@@ -984,8 +1037,13 @@ class eledia_services extends external_api {
         require_once($CFG->dirroot."/local/eledia_webservicesuite/lib.php");
         self::validate_parameters(self::get_user_by_idnumber_parameters(), array('idnumber' => $idnumber));
 
-        $user = get_record_by_idnumber ('user', $idnumber, true, true, 'wsusernotfound', 'wsmultipleusersfound');
-
+        try {
+            $user = get_record_by_idnumber ('user', $idnumber, true, true, 'wsusernotfound', 'wsmultipleusersfound');
+        } catch (Exception $exc) {
+            $output['result'] = $exc->getMessage();
+            $output['success'] = false;
+            return $output;
+        }
         $hasuserupdatecap = has_capability('moodle/user:update', get_system_context());
 
         context_instance_preload($user);
@@ -1005,6 +1063,8 @@ class eledia_services extends external_api {
                 $userarray['mailformat'] = $user->mailformat;
             }
         }
+        $userarray['result'] = 'success';
+        $userarray['success'] = true;
         return $userarray;
     }
 
@@ -1015,12 +1075,14 @@ class eledia_services extends external_api {
     public static function get_user_by_idnumber_returns() {
         return new external_single_structure(
                 array(
-                    'id'    => new external_value(PARAM_NUMBER, 'ID of the user'),
+                    'success'   => new external_value(PARAM_BOOL, 'Return success of operation true or false'),
+                    'result'    => new external_value(PARAM_RAW, 'Return message'),
+                    'id'    => new external_value(PARAM_NUMBER, 'ID of the user', VALUE_OPTIONAL),
                     'username'    => new external_value(PARAM_RAW,
                             'Username policy is defined in Moodle security config', VALUE_OPTIONAL),
                     'firstname'   => new external_value(PARAM_NOTAGS, 'The first name(s) of the user', VALUE_OPTIONAL),
                     'lastname'    => new external_value(PARAM_NOTAGS, 'The family name of the user', VALUE_OPTIONAL),
-                    'fullname'    => new external_value(PARAM_NOTAGS, 'The fullname of the user'),
+                    'fullname'    => new external_value(PARAM_NOTAGS, 'The fullname of the user', VALUE_OPTIONAL),
                     'email'       => new external_value(PARAM_TEXT,
                             'An email address - allow email as root@localhost', VALUE_OPTIONAL),
                     'address'     => new external_value(PARAM_MULTILANG, 'Postal address', VALUE_OPTIONAL),
@@ -1055,8 +1117,8 @@ class eledia_services extends external_api {
                     'url'         => new external_value(PARAM_URL, 'URL of the user', VALUE_OPTIONAL),
                     'country'     => new external_value(PARAM_ALPHA,
                             'Home country code of the user, such as AU or CZ', VALUE_OPTIONAL),
-                    'profileimageurlsmall' => new external_value(PARAM_URL, 'User image profile URL - small version'),
-                    'profileimageurl' => new external_value(PARAM_URL, 'User image profile URL - big version'),
+                    'profileimageurlsmall' => new external_value(PARAM_URL, 'User image profile URL - small version', VALUE_OPTIONAL),
+                    'profileimageurl' => new external_value(PARAM_URL, 'User image profile URL - big version', VALUE_OPTIONAL),
                     'customfields' => new external_multiple_structure(
                         new external_single_structure(
                             array(
@@ -1132,6 +1194,10 @@ class eledia_services extends external_api {
             $plugin = enrol_get_plugin($enrolmentinstance->enrol);
             $plugin->unenrol_user($enrolmentinstance, $user->id);
         }
+
+        $output['result'] = 'success';
+        $output['success'] = true;
+        return $output;
     }
 
     /**
@@ -1139,7 +1205,14 @@ class eledia_services extends external_api {
      * @return external_description
      */
     public static function unenrol_users_by_idnumber_returns() {
-        return null;
+        return new external_multiple_structure(
+            new external_single_structure(
+                array(
+                    'success'   => new external_value(PARAM_BOOL, 'Return success of operation true or false'),
+                    'result'    => new external_value(PARAM_RAW, 'Return message'),
+                )
+            )
+        );
     }
 
     /**
@@ -1174,16 +1247,30 @@ class eledia_services extends external_api {
 
         self::validate_parameters(self::course_completion_parameters(), array('completion' => $params));
         $params = $params[0];
-
+        $output = array();
         require_once($CFG->dirroot.'/lib/completionlib.php');
 
-        $user = get_record_by_idnumber ('user', $params['useridnumber'], true, true, 'wsusernotfound', 'wsmultipleusersfound');
-        $course = get_record_by_idnumber ('course',
-                $params['courseidnumber'],
-                true,
-                true,
-                'wscoursenotfound',
-                'wsmultiplecoursesfound');
+        try {
+            $user = get_record_by_idnumber ('user', $params['useridnumber'], true, true, 'wsusernotfound', 'wsmultipleusersfound');
+        } catch (Exception $exc) {
+            $output['result'] = $exc->getMessage();
+            $output['success'] = false;
+            return array($output);
+        }
+
+        try {
+            $course = get_record_by_idnumber ('course',
+                    $params['courseidnumber'],
+                    true,
+                    true,
+                    'wscoursenotfound',
+                    'wsmultiplecoursesfound');
+        } catch (Exception $exc) {
+            $output['result'] = $exc->getMessage();;
+            $output['success'] = false;
+            return array($output);
+        }
+
         require_capability('report/completion:view', CONTEXT_COURSE::instance($course->id));
         $info = new completion_info($course);
         $result = $info->get_completions($user->id);
@@ -1204,7 +1291,8 @@ class eledia_services extends external_api {
 
         $ccompletion = new completion_completion(array('userid' => $user->id, 'course' => $course->id));
         $course_comp = $ccompletion->is_complete();
-
+        $output['result'] = 'success';
+        $output['success'] = true;
         $output['course_completed'] = $course_comp;
         $output['criteria_list'] = $comp_info_formated;
         return array($output);
@@ -1218,7 +1306,9 @@ class eledia_services extends external_api {
         return new external_multiple_structure(
             new external_single_structure(
                 array(
-                    'course_completed'    => new external_value(PARAM_BOOL, 'completion status of the user'),
+                    'success'   => new external_value(PARAM_BOOL, 'Return success of operation true or false'),
+                    'result'    => new external_value(PARAM_RAW, 'Return message'),
+                    'course_completed'    => new external_value(PARAM_BOOL, 'completion status of the user', VALUE_OPTIONAL),
                     'criteria_list'       => new external_multiple_structure(
                         new external_single_structure(
                             array(
@@ -1230,7 +1320,7 @@ class eledia_services extends external_api {
                                 'moduleinstance' => new external_value(PARAM_INT, 'modul instance id', VALUE_OPTIONAL),
                                 'gradepass' => new external_value(PARAM_FLOAT, 'the grade to pass', VALUE_OPTIONAL),
                             )
-                        )
+                        ), '', VALUE_OPTIONAL
                     )
                 )
             )
@@ -1266,12 +1356,22 @@ class eledia_services extends external_api {
         require_once($CFG->dirroot.'/lib/completionlib.php');
 
         $user = get_record_by_idnumber ('user', $params['useridnumber'], true, true, 'wsusernotfound', 'wsmultipleusersfound');
+        if (empty($user)) {
+            $output['result'] = 'User not found for idnumber '.$params['useridnumber'];
+            $output['success'] = false;
+            return array($output);
+        }
         $course = get_record_by_idnumber ('course',
                 $params['courseidnumber'],
                 true,
                 true,
                 'wscoursenotfound',
                 'wsmultiplecoursesfound');
+        if (empty($course)) {
+            $output['result'] = 'Course not found for idnumber '.$params['courseidnumber'];
+            $output['success'] = false;
+            return array($output);
+        }
         require_capability('report/completion:view', CONTEXT_COURSE::instance($course->id));
         $info = new completion_info($course);
         $result = $info->get_completions($user->id);
@@ -1293,6 +1393,8 @@ class eledia_services extends external_api {
         $ccompletion = new completion_completion(array('userid' => $user->id, 'course' => $course->id));
         $course_comp = $ccompletion->is_complete();
 
+        $output['result'] = 'success';
+        $output['success'] = true;
         $output['course_completed'] = $course_comp;
         $output['criteria_list'] = $comp_info_formated;
         return array($output);
@@ -1306,7 +1408,9 @@ class eledia_services extends external_api {
         return new external_multiple_structure(
             new external_single_structure(
                 array(
-                    'course_completed'    => new external_value(PARAM_BOOL, 'completion status of the user'),
+                    'success'   => new external_value(PARAM_BOOL, 'Return success of operation true or false'),
+                    'result'    => new external_value(PARAM_RAW, 'Return message'),
+                    'course_completed'    => new external_value(PARAM_BOOL, 'completion status of the user', VALUE_OPTIONAL),
                     'criteria_list'       => new external_multiple_structure(
                         new external_single_structure(
                             array(
@@ -1319,7 +1423,7 @@ class eledia_services extends external_api {
                                 'gradepass' => new external_value(PARAM_FLOAT, 'the grade to pass', VALUE_OPTIONAL),
                             )
                         )
-                    )
+                    ), '', VALUE_OPTIONAL
                 )
             )
         );
@@ -1480,8 +1584,7 @@ class eledia_services extends external_api {
             // End of user info validation.
 
             // Create the user data now!
-           $user['id'] = user_create_user($user, $user['update_password'], false);
-
+            $user['id'] = user_create_user($user, $user['update_password']);
 
             // Custom fields.
             if (!empty($user['customfields'])) {
@@ -1527,6 +1630,4 @@ class eledia_services extends external_api {
             )
         );
     }
-
-
 }

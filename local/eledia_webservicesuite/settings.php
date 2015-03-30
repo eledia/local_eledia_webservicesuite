@@ -25,6 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die;
 
+global $CFG;
+
 if ($hassiteconfig) {
     $settings = new admin_settingpage('local_eledia_webservicesuite', get_string('pluginname', 'local_eledia_webservicesuite'));
     $ADMIN->add('localplugins', $settings);
@@ -33,6 +35,9 @@ if ($hassiteconfig) {
 
     $configs[] = new admin_setting_configtext('test_token',
             get_string('test_token', 'local_eledia_webservicesuite'), '', '', PARAM_RAW, 40);
+    $a = $CFG->wwwroot.'/local/eledia_webservicesuite/test_services.php';
+    $configs[] = new admin_setting_heading('test_form',
+            '', get_string('test_form_desc', 'local_eledia_webservicesuite', $a));
 
     foreach ($configs as $config) {
         $config->plugin = 'local_eledia_webservicesuite';

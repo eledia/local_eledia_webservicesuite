@@ -47,6 +47,7 @@ $string['pluginname'] = 'eledia webservicesuite';
 $string['start'] = 'call function';
 $string['service_choose'] = 'chose the function';
 
+$string['test_form_desc'] = 'Find the form for tests <a href={$a}>here</a>.';
 $string['test_header'] = 'eledia webservicesuite function tester';
 $string['test_token'] = 'token for testscript';
 

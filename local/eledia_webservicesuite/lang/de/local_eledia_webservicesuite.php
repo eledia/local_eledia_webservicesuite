@@ -32,7 +32,7 @@ $string['eledia_desc'] = 'Fomular zum Testen der Funkionen des webservice.<br />
     Beachten sie das die Aufrufe in diesem Formular tatsächlich auf dem System ausgeführt werden.<br />
 <br />
 Um dieses Formular zu nutzen müssen die soap webservcies aktiviert und konfiguriert sein.<br />
-Die Einstellungen zu den webservices finden sie hier: <a href={$a}>{$a}</a><br />
+Die Einstellungen zu den webservices finden sie <a href={$a}>hier</a>.<br />
 Der Token für den webservice Nutzer muss in der Konfiguration dieses Plugins eingetragen werden.<br />
 <br />';
 $string['eledia_header'] = 'eledia webservicesuite';
@@ -47,6 +47,7 @@ $string['pluginname'] = 'eledia webservicesuite';
 $string['start'] = 'Funktion Aufrufen';
 $string['service_choose'] = 'Funktion wählen';
 
+$string['test_form_desc'] = 'Das Formular zum Testen finden sie <a href={$a}>hier</a>.';
 $string['test_header'] = 'eledia webservicesuite Funktions Test';
 $string['test_token'] = 'Token für webservice Tests';
 
