@@ -10,7 +10,7 @@ The new functions appear within the moodle webservice function list after instal
 The functions definition can be found within the API Documentation in Site Administration/Plugins/Web Services.
 
 List of functions:
-elediaservice_update_users_by_idnumber => updates the submittet user profile identified by idnumber
+elediaservice_update_users_by_idnumber => updates the submitted user profile identified by idnumber
 elediaservice_enrol_users_by_idnumber => enrols users in the given courses, users and courses are identified by idnumber
 elediaservice_get_courses_by_idnumber => returns a course object according to the given idnumber
 elediaservice_update_courses_by_idnumber => updates a course object according to the given idnumber

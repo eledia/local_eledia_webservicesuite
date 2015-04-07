@@ -29,7 +29,7 @@ $functions = array(
         'classname' => 'eledia_services',
         'methodname' => 'update_users_by_idnumber',
         'classpath' => 'local/eledia_webservicesuite/externallib.php',
-        'description' => 'updates the submittet user profile',
+        'description' => 'updates the submitted user profile',
         'type' => 'write',
         'capabilities' => 'local/eledia_webservicesuite:access, moodle/user:update',
     ),
