@@ -1333,7 +1333,6 @@ class eledia_services extends external_api {
         );
     }
 
-
     /**
      * Returns description of method parameters
      * @return external_function_parameters
@@ -1434,7 +1433,6 @@ class eledia_services extends external_api {
             )
         );
     }
-
 
     /**
      * Returns description of method parameters
@@ -1636,4 +1634,93 @@ class eledia_services extends external_api {
             )
         );
     }
+
+    /**
+     * Returns description of method parameters
+     * @return external_function_parameters
+     */
+    public static function get_grade_by_timespan_parameters() {
+        return new external_function_parameters(
+            array(
+                'grade' =>
+                        new external_single_structure(
+                            array(
+                                'from' => new external_value(PARAM_RAW, 'timestamp the grades must be after'),
+                                'to' => new external_value(PARAM_RAW, 'timestamp the grade must befor'),
+                            )
+                        )
+            )
+        );
+    }
+
+    /**
+     * Returns grades list.
+     *
+     * @param array $params array contains user idnumber and course idnumber
+     * @return array An array with  the completion information for the user in the specified course
+     */
+    public static function get_grade_by_timespan($params) {
+        global $CFG, $DB;
+        require_once($CFG->dirroot."/local/eledia_webservicesuite/lib.php");
+
+        $params = self::validate_parameters(self::get_grade_by_timespan_parameters(), $params);
+
+        $sql_params = array($params['grade']['from'], $params['grade']['to']);
+        $sql = 'SELECT gg.id, u.username, gg.userid, c.fullname AS coursename, gi.courseid, gg.finalgrade, gi.itemname, gi.itemtype
+                FROM {grade_grades} gg, {grade_items} gi, {user} u, {course} c
+                WHERE gg.timemodified > ?
+                AND gg.timemodified < ?
+                AND gg.itemid = gi.id
+                AND u.id = gg.userid
+                AND c.id = gi.courseid';
+
+        try {
+            $grades = $DB->get_records_sql($sql, $sql_params);
+        } catch (Exception $exc) {
+            $output['result'] = $exc->getMessage();
+            $output['success'] = false;
+            return array($output);
+        }
+
+        $output['result'] = 'success';
+        $output['success'] = true;
+        $output['grades'] = $grades;
+        return array($output);
+    }
+
+    /**
+     * Returns description of method result value
+     * @return external_description
+     */
+    public static function get_grade_by_timespan_returns() {
+        return new external_multiple_structure(
+            new external_single_structure(
+                array(
+                    'success'   => new external_value(PARAM_BOOL, 'Return success of operation true or false'),
+                    'result'    => new external_value(PARAM_RAW, 'Return message'),
+                    'grades' => new external_multiple_structure(
+                        new external_single_structure(
+                            array(
+                                'username' =>
+                                    new external_value(PARAM_RAW, 'Username of the user.'),
+                                'userid' =>
+                                    new external_value(PARAM_RAW, 'ID of the user.'),
+                                'coursename' =>
+                                    new external_value(PARAM_RAW, 'The course the grade is for or the course that contains the modul the grade is for.'),
+                                'courseid' =>
+                                    new external_value(PARAM_RAW, 'The course id.'),
+                                'finalgrade' =>
+                                    new external_value(PARAM_RAW, 'The final grade the user gets in the modul/course.'),
+                                'itemname' =>
+                                    new external_value(PARAM_RAW, 'If it is a module this contains the modul instance name.', VALUE_OPTIONAL),
+                                'itemtype' =>
+                                    new external_value(PARAM_RAW, 'The type of the grade. For example course or mod for modul.', VALUE_OPTIONAL),
+                            )
+                        )
+                    )
+                )
+            )
+        );
+    }
+
 }

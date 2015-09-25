@@ -110,5 +110,13 @@ $functions = array(
         'type' => 'write',
         'capabilities' => 'local/eledia_webservicesuite:access, moodle/user:create',
     ),
+    'elediaservice_get_grade_by_timespan' => array(
+        'classname' => 'eledia_services',
+        'methodname' => 'get_grade_by_timespan',
+        'classpath' => 'local/eledia_webservicesuite/externallib.php',
+        'description' => 'Get all grades with modified timestamp between the given timestamps.',
+        'type' => 'write',
+        'capabilities' => '',
+    ),
 );
 
