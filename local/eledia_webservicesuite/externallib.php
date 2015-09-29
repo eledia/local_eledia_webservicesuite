@@ -1666,7 +1666,7 @@ class eledia_services extends external_api {
         $params = self::validate_parameters(self::get_grade_by_timespan_parameters(), $params);
 
         $sql_params = array($params['grade']['from'], $params['grade']['to']);
-        $sql = 'SELECT gg.id, u.username, gg.userid, c.fullname AS coursename, gi.courseid, gg.finalgrade, gi.itemname, gi.itemtype
+        $sql = 'SELECT gg.id, u.username, gg.userid, c.fullname AS coursename, gi.courseid, gg.finalgrade, gi.itemname, gi.itemtype, gi.grademax
                 FROM {grade_grades} gg, {grade_items} gi, {user} u, {course} c
                 WHERE gg.timemodified > ?
                 AND gg.timemodified < ?
@@ -1680,6 +1680,10 @@ class eledia_services extends external_api {
             $output['result'] = $exc->getMessage();
             $output['success'] = false;
             return array($output);
+        }
+
+        foreach ($grades as $grade) {
+            $grade->percent = $grade->finalgrade/($grade->grademax/100);
         }
 
         $output['result'] = 'success';
@@ -1711,6 +1715,8 @@ class eledia_services extends external_api {
                                     new external_value(PARAM_RAW, 'The course id.'),
                                 'finalgrade' =>
                                     new external_value(PARAM_RAW, 'The final grade the user gets in the modul/course.'),
+                                'percent' =>
+                                    new external_value(PARAM_RAW, 'The final grade as percent of possible points.'),
                                 'itemname' =>
                                     new external_value(PARAM_RAW, 'If it is a module this contains the modul instance name.', VALUE_OPTIONAL),
                                 'itemtype' =>
