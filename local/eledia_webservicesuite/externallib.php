@@ -1457,7 +1457,11 @@ class eledia_services extends external_api {
                             'lastname' =>
                                 new external_value(PARAM_NOTAGS, 'The family name of the user'),
                             'update_password' =>
-                                new external_value(PARAM_BOOL, 'Should user passwords be updated'),
+                                new external_value(PARAM_BOOL, 'Should user passwords be updated',
+                                    VALUE_DEFAULT, true, VALUE_OPTIONAL),
+                            'email_check' =>
+                                new external_value(PARAM_BOOL, 'Should user email be checked for doubles',
+                                    VALUE_DEFAULT, true, VALUE_OPTIONAL),
                             'email' =>
                                 new external_value(PARAM_EMAIL, 'A valid and unique email address'),
                             'auth' =>
@@ -1582,9 +1586,13 @@ class eledia_services extends external_api {
             // Make sure we validate current user info as handled by current GUI. See user/editadvanced_form.php func validation().
             if (!validate_email($user['email'])) {
                 throw new invalid_parameter_exception('Email address is invalid: '.$user['email']);
-            } else if ($DB->record_exists('user', array('email' => $user['email'], 'mnethostid' => $user['mnethostid']))) {
-                throw new invalid_parameter_exception('Email address already exists: '.$user['email']);
             }
+            if ($user['email_check']) {
+                if ($DB->record_exists('user', array('email' => $user['email'], 'mnethostid' => $user['mnethostid']))) {
+                    throw new invalid_parameter_exception('Email address already exists: '.$user['email']);
+                }
+            }
+
             // End of user info validation.
 
             // Create the user data now!
