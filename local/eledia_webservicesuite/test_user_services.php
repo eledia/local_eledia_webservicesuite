@@ -30,6 +30,7 @@ require_login(0, false);
 $context = CONTEXT_SYSTEM::instance();
 require_capability('moodle/site:config', $context);
 $PAGE->set_context($context);
+require_once($CFG->dirroot.'/user/lib.php');
 
 global $DB;
 $config = get_config('local_eledia_webservicesuite');
@@ -148,4 +149,5 @@ try {
     mtrace($client->__getLastResponse());
 }
 
+$user = $DB->get_record('user', array('username' => $user->username));
 user_delete_user($user);

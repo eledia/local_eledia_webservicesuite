@@ -59,9 +59,11 @@ class eledia_services extends external_api {
 
         require_once($CFG->dirroot . "/user/lib.php");
         self::validate_parameters(self::get_user_by_mail_parameters(), array('mails' => $mails));
-
-        list($uselect, $ujoin) = context_instance_preload_sql('u.id', CONTEXT_USER, 'ctx');
-        list($sqlmails, $params) = $DB->get_in_or_equal($mails);
+        $ctxselect = ', ' . context_helper::get_preload_record_columns_sql('ctx');
+        $ctxjoin = "LEFT JOIN {context} ctx ON (ctx.instanceid = u.id AND ctx.contextlevel = :contextlevel)";
+        $params = array('contextlevel' => CONTEXT_USER);
+        list($sqlmails, $params) = $DB->get_in_or_equal($idnumbers);
+        $params['contextlevel'] = array('contextlevel' => CONTEXT_USER);
         $usersql = "SELECT u.* $uselect
                       FROM {user} u $ujoin
                      WHERE u.email $sqlmails";
@@ -206,9 +208,11 @@ class eledia_services extends external_api {
 
         require_once($CFG->dirroot . "/user/lib.php");
         self::validate_parameters(self::get_users_by_idnumber_parameters(), array('idnumbers' => $idnumbers));
-
-        list($uselect, $ujoin) = context_instance_preload_sql('u.id', CONTEXT_USER, 'ctx');
+        $ctxselect = ', ' . context_helper::get_preload_record_columns_sql('ctx');
+        $ctxjoin = "LEFT JOIN {context} ctx ON (ctx.instanceid = u.id AND ctx.contextlevel = :contextlevel)";
+        $params = array('contextlevel' => CONTEXT_USER);
         list($sqlmails, $params) = $DB->get_in_or_equal($idnumbers);
+        $params['contextlevel'] = array('contextlevel' => CONTEXT_USER);
         $usersql = "SELECT u.* $uselect
                       FROM {user} u $ujoin
                      WHERE u.idnumber $sqlmails";
@@ -220,7 +224,7 @@ class eledia_services extends external_api {
             if (!empty($user->deleted)) {
                 continue;
             }
-            context_instance_preload($user);
+            context_helper::preload_from_record($user);
             $usercontext = CONTEXT_USER::instance($user->id);
             self::validate_context($usercontext);
             $currentuser = ($user->id == $USER->id);
@@ -1051,8 +1055,7 @@ class eledia_services extends external_api {
             return $output;
         }
         $hasuserupdatecap = has_capability('moodle/user:update', get_system_context());
-
-        context_instance_preload($user);
+        context_helper::preload_from_record($user);
         $usercontext = CONTEXT_USER::instance($user->id);
         self::validate_context($usercontext);
         $currentuser = ($user->id == $USER->id);
@@ -1736,5 +1739,4 @@ class eledia_services extends external_api {
             )
         );
     }
-
 }
