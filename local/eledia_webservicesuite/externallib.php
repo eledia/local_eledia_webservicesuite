@@ -1300,10 +1300,25 @@ class eledia_services extends external_api {
 
         $ccompletion = new completion_completion(array('userid' => $user->id, 'course' => $course->id));
         $course_comp = $ccompletion->is_complete();
+
         $output['result'] = 'success';
         $output['success'] = true;
         $output['course_completed'] = $course_comp;
+        if (!empty($ccompletion->timecompleted)) {
+            $output['timecompleted'] = $ccompletion->timecompleted;
+        }
         $output['criteria_list'] = $comp_info_formated;
+
+        // Get course grade for call
+        require_once($CFG->libdir.'/gradelib.php');
+        $grade_item = grade_item::fetch(array('courseid' => $course->id, 'itemtype' => 'course'));
+        if (!empty($grade_item)) {
+            $grade = grade_grade::fetch(array('itemid'=> $grade_item->id, 'userid' => $user->id));
+            if (!empty($grade)) {
+                $grade_percent = round($grade->finalgrade / ($grade->rawgrademax / 100));
+                $output['grade_percent'] = $grade_percent;
+            }
+        }
         return array($output);
     }
 
@@ -1318,6 +1333,8 @@ class eledia_services extends external_api {
                     'success'   => new external_value(PARAM_BOOL, 'Return success of operation true or false'),
                     'result'    => new external_value(PARAM_RAW, 'Return message'),
                     'course_completed'    => new external_value(PARAM_BOOL, 'completion status of the user', VALUE_OPTIONAL),
+                    'timecompleted'    => new external_value(PARAM_INT, 'timestamp of course completion', VALUE_OPTIONAL),
+                    'grade_percent'    => new external_value(PARAM_FLOAT, 'final grade of the course as %', VALUE_OPTIONAL),
                     'criteria_list'       => new external_multiple_structure(
                         new external_single_structure(
                             array(
