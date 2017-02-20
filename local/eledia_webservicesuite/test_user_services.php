@@ -126,9 +126,11 @@ try {
 
 // Test update_users_by_idnumber.
 mtrace('Test update_users_by_idnumber -> update firstname to b');
-$user->firstname = 'b';
+$update_user = new stdClass();
+$update_user->idnumber = '749116';
+$update_user->firstname = 'b';
 try {
-    $update_users_by_idnumber = $client->elediaservice_update_users_by_idnumber(array($user));
+    $update_users_by_idnumber = $client->elediaservice_update_users_by_idnumber(array($update_user));
     mtrace('...successful<br /><br />');
 } catch (Exception $exc) {
     mtrace('<br />Error:<br />');
