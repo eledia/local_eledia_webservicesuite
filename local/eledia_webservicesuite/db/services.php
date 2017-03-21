@@ -118,5 +118,13 @@ $functions = array(
         'type' => 'write',
         'capabilities' => '',
     ),
+    'elediaservice_duplicate_course' => array(
+        'classname' => 'eledia_services',
+        'methodname' => 'duplicate_course',
+        'classpath' => 'local/eledia_webservicesuite/externallib.php',
+        'description' => 'Copy of core duplicate course with additional option to set course idnumber.',
+        'type' => 'write',
+        'capabilities' => 'moodle/course:create, moodle/restore:restorecourse, moodle/backup:backupcourse',
+    ),
 );
 
