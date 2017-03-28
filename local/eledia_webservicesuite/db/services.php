@@ -126,5 +126,15 @@ $functions = array(
         'type' => 'write',
         'capabilities' => 'moodle/course:create, moodle/restore:restorecourse, moodle/backup:backupcourse',
     ),
+    'elediaservice_create_or_update_users' => array(
+        'classname' => 'eledia_services',
+        'methodname' => 'create_or_update_users',
+        'classpath' => 'local/eledia_webservicesuite/externallib.php',
+        'description' => 'Create or update one or more users. With a parameter to set user password to update or not and a parameter to check email or not.'
+        . ' All parameter are optional in the first place. But username or id must be given for update. For create username, firstname, lastname and email must be set.'
+        . 'Password can be optional in create, if createpassword option is set.',
+        'type' => 'write',
+        'capabilities' => 'local/eledia_webservicesuite:access, moodle/user:create, moodle/user:update',
+    ),
 );
 
