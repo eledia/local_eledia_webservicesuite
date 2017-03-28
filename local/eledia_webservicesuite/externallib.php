@@ -2001,4 +2001,280 @@ class eledia_services extends external_api {
     }
 
 
+    /**
+     * Returns description of method parameters
+     *
+     * @return external_function_parameters
+     * @since Moodle 2.2
+     */
+    public static function create_or_update_users_parameters() {
+        global $CFG;
+
+        return new external_function_parameters(
+            array(
+                'users' => new external_multiple_structure(
+                    new external_single_structure(
+                        array(
+                            'id' =>
+                                new external_value(core_user::get_property_type('id'), 'ID of the user(only for update).', VALUE_OPTIONAL),
+                            'username' =>
+                                new external_value(PARAM_USERNAME, 'Username policy is defined in Moodle security config.', VALUE_OPTIONAL),
+
+                            'password' =>
+                                new external_value(core_user::get_property_type('password'), 'Plain text password consisting of any characters', VALUE_OPTIONAL,
+                                    '', NULL_NOT_ALLOWED),
+                            'createpassword' =>
+                                new external_value(PARAM_BOOL, 'True if password should be created and mailed to user.',
+                                    VALUE_OPTIONAL),
+                            'firstname' =>
+                                new external_value(core_user::get_property_type('firstname'), 'The first name(s) of the user', VALUE_OPTIONAL, '',
+                                    NULL_NOT_ALLOWED),
+                            'lastname' =>
+                                new external_value(core_user::get_property_type('lastname'), 'The family name of the user', VALUE_OPTIONAL),
+                            'update_password' =>
+                                new external_value(PARAM_BOOL, 'Should user passwords be updated',
+                                    VALUE_DEFAULT, true, VALUE_OPTIONAL),
+                            'email_check' =>
+                                new external_value(PARAM_BOOL, 'Should user email be checked for doubles',
+                                    VALUE_DEFAULT, true, VALUE_OPTIONAL),
+                            'email' =>
+                                new external_value(core_user::get_property_type('email'), 'A valid and unique email address', VALUE_OPTIONAL, '',
+                                    NULL_NOT_ALLOWED),
+                            'auth' =>
+                                new external_value(PARAM_PLUGIN, 'Auth plugins include manual, ldap, imap, etc', VALUE_DEFAULT,
+                                    'manual', NULL_NOT_ALLOWED),
+                            'idnumber' =>
+                                new external_value(PARAM_RAW, 'An arbitrary ID code number perhaps from the institution',
+                                    VALUE_DEFAULT, ''),
+                            'lang' =>
+                                new external_value(PARAM_SAFEDIR, 'Language code such as "en", must exist on server', VALUE_DEFAULT,
+                                    $CFG->lang, NULL_NOT_ALLOWED),
+                            'calendartype' =>
+                                new external_value(PARAM_PLUGIN, 'Calendar type such as "gregorian", must exist on server',
+                                    VALUE_DEFAULT, $CFG->calendartype, VALUE_OPTIONAL),
+                            'theme' =>
+                                new external_value(PARAM_PLUGIN, 'Theme name such as "standard", must exist on server',
+                                    VALUE_OPTIONAL),
+                            'timezone' =>
+                                new external_value(PARAM_TIMEZONE, 'Timezone code such as Australia/Perth, or 99 for default',
+                                    VALUE_OPTIONAL),
+                            'mailformat' =>
+                                new external_value(PARAM_INT, 'Mail format code is 0 for plain text, 1 for HTML etc',
+                                    VALUE_OPTIONAL),
+                            'description' =>
+                                new external_value(PARAM_TEXT, 'User profile description, no HTML', VALUE_OPTIONAL),
+                            'city' =>
+                                new external_value(PARAM_NOTAGS, 'Home city of the user', VALUE_OPTIONAL),
+                            'country' =>
+                                new external_value(PARAM_ALPHA, 'Home country code of the user, such as AU or CZ', VALUE_OPTIONAL),
+                            'firstnamephonetic' =>
+                                new external_value(PARAM_NOTAGS, 'The first name(s) phonetically of the user', VALUE_OPTIONAL),
+                            'lastnamephonetic' =>
+                                new external_value(PARAM_NOTAGS, 'The family name phonetically of the user', VALUE_OPTIONAL),
+                            'middlename' =>
+                                new external_value(PARAM_NOTAGS, 'The middle name of the user', VALUE_OPTIONAL),
+                            'alternatename' =>
+                                new external_value(PARAM_NOTAGS, 'The alternate name of the user', VALUE_OPTIONAL),
+                            'preferences' => new external_multiple_structure(
+                                new external_single_structure(
+                                    array(
+                                        'type'  => new external_value(PARAM_ALPHANUMEXT, 'The name of the preference'),
+                                        'value' => new external_value(PARAM_RAW, 'The value of the preference')
+                                    )
+                                ), 'User preferences', VALUE_OPTIONAL),
+                            'customfields' => new external_multiple_structure(
+                                new external_single_structure(
+                                    array(
+                                        'type'  => new external_value(PARAM_ALPHANUMEXT, 'The name of the custom field'),
+                                        'value' => new external_value(PARAM_RAW, 'The value of the custom field')
+                                    )
+                                ), 'User custom fields (also known as user profil fields)', VALUE_OPTIONAL)
+                        )
+                    )
+                )
+            )
+
+        );
+    }
+
+    /**
+     * Create or update one or more users.
+     *
+     * @throws invalid_parameter_exception
+     * @param array $users An array of users to create or update.
+     * @return array An array of arrays
+     */
+    public static function create_or_update_users($users) {
+        global $CFG, $DB;
+        require_once($CFG->dirroot."/lib/weblib.php");
+        require_once($CFG->dirroot."/user/lib.php");
+        require_once($CFG->dirroot."/user/profile/lib.php"); // Required for customfields related function.
+
+        // Ensure the current user is allowed to run this function.
+        $context = context_system::instance();
+        require_capability('moodle/user:create', $context);
+        require_capability('moodle/user:update', $context);
+        self::validate_context($context);
+
+        // Do basic automatic PARAM checks on incoming data, using params description.
+        // If any problems are found then exceptions are thrown with helpful error messages.
+        $params = self::validate_parameters(self::create_or_update_users_parameters(), array('users' => $users));
+
+        $availableauths  = core_component::get_plugin_list('auth');
+        unset($availableauths['mnet']);       // These would need mnethostid too.
+        unset($availableauths['webservice']); // We do not want new webservice users for now.
+
+        $availablethemes = core_component::get_plugin_list('theme');
+        $availablelangs  = get_string_manager()->get_list_of_translations();
+
+        $transaction = $DB->start_delegated_transaction();
+
+        $userids = array();
+
+        foreach ($params['users'] as $user) {
+
+            if (empty($user['username']) && empty($user['id'])) {
+                    throw new invalid_parameter_exception('Username and id empty. One identifier must be given!');
+            }
+            if (!empty($user['id'])) {
+                $existinguser = core_user::get_user($user['id']);
+            } else {
+                $existinguser = core_user::get_user_by_username($user['username']);
+            }
+
+            // Check for exisiting user.
+            if (empty($existinguser)) {
+                // Make sure auth is valid.
+                if (empty($availableauths[$user['auth']])) {
+                    throw new invalid_parameter_exception('Invalid authentication type: '.$user['auth']);
+                }
+                // Make sure lang is valid.
+                if (empty($availablelangs[$user['lang']])) {
+                    throw new invalid_parameter_exception('Invalid language code: '.$user['lang']);
+                }
+                // No ID used when create case.
+                if (!empty($user['id'])) {
+                    unset($user['id']);
+                }
+
+                // Start of user info validation.
+                // Check mandatory fileds.
+                if (empty($user['firstname'])) {
+                    throw new invalid_parameter_exception('Missing firstname for user: '.$user['username']);
+                }
+                if (empty($user['lastname'])) {
+                    throw new invalid_parameter_exception('Missing lastname for user: '.$user['username']);
+                }
+                if (empty($user['email'])) {
+                    throw new invalid_parameter_exception('Missing email for user: '.$user['username']);
+                }
+                if (empty($user['password']) && empty($user['createpassword'])) {
+                    throw new invalid_parameter_exception('Missing password and createpassword not set for user: '.$user['username']);
+                }
+
+                // Make sure lang is valid.
+                if (!empty($user['theme']) && empty($availablethemes[$user['theme']])) { // Theme is VALUE_OPTIONAL,
+                                                                                         // so no default value
+                                                                                         // We need to test if the client sent it
+                                                                                         // => !empty($user['theme']).
+                    throw new invalid_parameter_exception('Invalid theme: '.$user['theme']);
+                }
+
+                $user['confirmed'] = true;
+                $user['mnethostid'] = $CFG->mnet_localhost_id;
+
+                // Make sure we validate current user info as handled by current GUI. See user/editadvanced_form.php func validation().
+                if (!validate_email($user['email'])) {
+                    throw new invalid_parameter_exception('Email address is invalid: '.$user['email']);
+                }
+                if ($user['email_check']) {
+                    if ($DB->record_exists('user', array('email' => $user['email'], 'mnethostid' => $user['mnethostid']))) {
+                        throw new invalid_parameter_exception('Email address already exists: '.$user['email']);
+                    }
+                }
+
+                // End of user info validation.
+
+                // Create the user data now!
+                $user['id'] = user_create_user($user, $user['update_password']);
+
+                // Custom fields.
+                if (!empty($user['customfields'])) {
+                    foreach ($user['customfields'] as $customfield) {
+                        // Profile_save_data() saves profile file it's expecting a user with the correct id,
+                        // and custom field to be named profile_field_"shortname".
+                        $user["profile_field_".$customfield['type']] = $customfield['value'];
+                    }
+                    profile_save_data((object) $user);
+                }
+
+                // Trigger event.
+                \core\event\user_created::create_from_userid($user['id'])->trigger();
+
+                // Preferences.
+                if (!empty($user['preferences'])) {
+                    foreach ($user['preferences'] as $preference) {
+                        set_user_preference($preference['type'], $preference['value'], $user['id']);
+                    }
+                }
+
+                $userids[] = array('id' => $user['id'], 'username' => $user['username'], 'action' => 'create');
+            } else {
+                // Check if we are trying to update an admin.
+                if ($existinguser->id != $USER->id and is_siteadmin($existinguser) and !is_siteadmin($USER)) {
+                    continue;
+                }
+                // Other checks (deleted, remote or guest users).
+                if ($existinguser->deleted or is_mnet_remote_user($existinguser) or isguestuser($existinguser->id)) {
+                    continue;
+                }
+                $user['id'] = $existinguser->id;
+                user_update_user($user, true, false);
+                // Update user custom fields.
+                if (!empty($user['customfields'])) {
+
+                    foreach ($user['customfields'] as $customfield) {
+                        // Profile_save_data() saves profile file it's expecting a user with the correct id,
+                        // and custom field to be named profile_field_"shortname".
+                        $user["profile_field_".$customfield['type']] = $customfield['value'];
+                    }
+                    profile_save_data((object) $user);
+                }
+
+                // Trigger event.
+                \core\event\user_updated::create_from_userid($user['id'])->trigger();
+
+                // Preferences.
+                if (!empty($user['preferences'])) {
+                    foreach ($user['preferences'] as $preference) {
+                        set_user_preference($preference['type'], $preference['value'], $user['id']);
+                    }
+                }
+                $userids[] = array('id' => $user['id'], 'username' => $user['username'], 'action' => 'update');
+            }
+        }
+
+        $transaction->allow_commit();
+
+        return $userids;
+    }
+
+    /**
+     * Returns description of method result value
+     *
+     * @return external_description
+     * @since Moodle 2.2
+     */
+    public static function create_or_update_users_returns() {
+        return new external_multiple_structure(
+            new external_single_structure(
+                array(
+                    'id'       => new external_value(PARAM_INT, 'user id'),
+                    'username' => new external_value(PARAM_USERNAME, 'user name'),
+                    'action' => new external_value(PARAM_RAW, 'action'),
+                )
+            )
+        );
+    }
+
 }
