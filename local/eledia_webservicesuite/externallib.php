@@ -1691,7 +1691,12 @@ class eledia_services extends external_api {
         global $CFG, $DB;
         require_once($CFG->dirroot."/local/eledia_webservicesuite/lib.php");
 
-        $params = self::validate_parameters(self::get_grade_by_timespan_parameters(), $params);
+        if (isset($params['grade'])) {
+            $params = self::validate_parameters(self::get_grade_by_timespan_parameters(), $params);
+        } else {
+            // Fix zend/REST error which cuts of the outer array.
+            $params = self::validate_parameters(self::get_grade_by_timespan_parameters(), array('grade' => $params));
+        }
 
         $sql_params = array($params['grade']['from'], $params['grade']['to']);
         $sql = 'SELECT gg.id, u.username, u.idnumber AS useridnumber, c.idnumber as courseidnumber, gg.userid, c.fullname AS coursename, gi.courseid, gg.finalgrade, gi.itemname, gi.itemtype, gi.grademax
