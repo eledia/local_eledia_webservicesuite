@@ -2282,4 +2282,113 @@ class eledia_services extends external_api {
         );
     }
 
+    /**
+     * Returns description of method parameters
+     * @return external_function_parameters
+     */
+    public static function get_scorm_report_parameters() {
+        return new external_function_parameters(
+                array(
+                    'userid' => new external_value(PARAM_RAW, 'the user to report'),
+                    'scormid' => new external_value(PARAM_RAW, 'the scrom module to report'),
+                )
+        );
+    }
+
+    /**
+     * Returns grades list.
+     *
+     * @param array $params array 
+     * @return array 
+     */
+    public static function get_scorm_report($params) {
+        global $DB;
+
+        self::validate_parameters(self::get_scorm_report_parameters(), $params);
+        
+        $output = array();
+        
+        // Get scrom tracking.
+        try {
+            $data = $DB->get_records('scorm_scoes_track', array('userid' => $params['userid'],
+                'scormid' => $params['scormid']));
+        } catch (Exception $exc) {
+            $output['result'] = $exc->getMessage();
+            $output['success'] = false;
+            $output['report'] = array();
+            return array($output);
+        }
+        
+        // Build up report.
+        $report = array();        
+        foreach ($data as $value) {
+            //Create new attempt entry.
+            if (empty($report[$value->attempt])) {
+                $report[$value->attempt] = new stdClass();
+                $report[$value->attempt]->last_access = 0;
+                $report[$value->attempt]->grade = 0;
+                $report[$value->attempt]->attempt = $value->attempt;
+            }
+            
+            // Set timestart.
+            if ($value->element == 'x.start.time') {
+                if (empty($report[$value->attempt]->started)) {
+                    $report[$value->attempt]->started = $value->value;
+                }
+                if($value->value < $report->started) {
+                    $report[$value->attempt]->started = $value->value;
+                }
+            }
+            
+            // Set grade.
+            if ($value->element == 'cmi.core.score.raw') {
+                $report[$value->attempt]->grade = $value->value;               
+            }
+            
+            // Set last_access.
+            if (empty($report->last_access)) {
+                $report[$value->attempt]->last_access = $value->timemodified;
+            }
+            if ($value->timemodified > $report[$value->scoid]->last_access) {
+                $report[$value->attempt]->last_access = $value->timemodified;
+            }
+            
+            // Set status.
+            if ($value->element == 'cmi.core.lesson_status') {
+                $report[$value->attempt]->status = $value->value;               
+            }
+        }
+
+        // Build up outpout array.
+        $output['result'] = 'success';
+        $output['success'] = true;
+        $output['report'] = $report;
+        return array($output);
+    }
+
+    /**
+     * Returns description of method result value
+     * @return external_description
+     */
+    public static function get_scorm_report_returns() {
+        return new external_multiple_structure(
+            new external_single_structure(
+                array(
+                    'success'   => new external_value(PARAM_BOOL, 'Return success of operation true or false'),
+                    'result'    => new external_value(PARAM_RAW, 'Return message'),
+                    'report' => new external_multiple_structure(
+                        new external_single_structure(
+                            array(
+                                'started'    => new external_value(PARAM_RAW, 'Scrom started on'),
+                                'last_access'    => new external_value(PARAM_RAW, 'Scrom last accessed on'),
+                                'grade'    => new external_value(PARAM_RAW, 'Score'),
+                                'attempt'    => new external_value(PARAM_RAW, 'Attempt'),
+                                'status'    => new external_value(PARAM_RAW, 'Status'),
+                            )
+                        ), VALUE_OPTIONAL
+                    )
+                )
+            )
+        );
+    }
 }

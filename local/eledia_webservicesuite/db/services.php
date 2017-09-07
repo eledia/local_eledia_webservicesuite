@@ -136,5 +136,13 @@ $functions = array(
         'type' => 'write',
         'capabilities' => 'local/eledia_webservicesuite:access, moodle/user:create, moodle/user:update',
     ),
+    'elediaservice_get_scorm_report' => array(
+        'classname' => 'eledia_services',
+        'methodname' => 'get_scorm_report',
+        'classpath' => 'local/eledia_webservicesuite/externallib.php',
+        'description' => 'Scrom Report for a single user on a single scrom.',
+        'type' => 'write',
+        'capabilities' => 'local/eledia_webservicesuite:access',
+    ),
 );
 
