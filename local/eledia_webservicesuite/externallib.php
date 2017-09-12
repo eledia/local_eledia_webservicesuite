@@ -2289,8 +2289,8 @@ class eledia_services extends external_api {
     public static function get_scorm_report_parameters() {
         return new external_function_parameters(
                 array(
-                    'userid' => new external_value(PARAM_RAW, 'the user to report'),
-                    'scormid' => new external_value(PARAM_RAW, 'the scrom module to report'),
+                    'username' => new external_value(PARAM_RAW, 'the user to report'),
+                    'scormid' => new external_value(PARAM_INT, 'the scorm module to report'),
                 )
         );
     }
@@ -2307,10 +2307,20 @@ class eledia_services extends external_api {
         self::validate_parameters(self::get_scorm_report_parameters(), $params);
         
         $output = array();
+
+        // Get user by username.
+        try {
+            $user = $DB->get_record('user', array('username' => $params['username']));
+        } catch (Exception $exc) {
+            $output['result'] = $exc->getMessage();
+            $output['success'] = false;
+            $output['report'] = array();
+            return array($output);
+        }        
         
         // Get scrom tracking.
         try {
-            $data = $DB->get_records('scorm_scoes_track', array('userid' => $params['userid'],
+            $data = $DB->get_records('scorm_scoes_track', array('userid' => $user->id,
                 'scormid' => $params['scormid']));
         } catch (Exception $exc) {
             $output['result'] = $exc->getMessage();
@@ -2379,8 +2389,8 @@ class eledia_services extends external_api {
                     'report' => new external_multiple_structure(
                         new external_single_structure(
                             array(
-                                'started'    => new external_value(PARAM_RAW, 'Scrom started on'),
-                                'last_access'    => new external_value(PARAM_RAW, 'Scrom last accessed on'),
+                                'started'    => new external_value(PARAM_RAW, 'Scorm started on'),
+                                'last_access'    => new external_value(PARAM_RAW, 'Scorm last accessed on'),
                                 'grade'    => new external_value(PARAM_RAW, 'Score'),
                                 'attempt'    => new external_value(PARAM_RAW, 'Attempt'),
                                 'status'    => new external_value(PARAM_RAW, 'Status'),
