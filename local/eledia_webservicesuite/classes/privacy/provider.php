@@ -15,17 +15,28 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information.
  *
- * @package    local
- * @subpackage eledia_webservicesuite
- * @author     Benjamin Wolf <support@eledia.de>
- * @copyright  2014 eLeDia GmbH
+ * @package     local
+ * @subpackage  eledia_webservicesuite
+ * @copyright   2018 eLeDia GmbH
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$plugin->version  = 2018062100;   // The (date) version of this plugin.
-$plugin->release = '0.3 (2018062100)';
-$plugin->requires  = 2013101800;        // Requires this Moodle version.
-$plugin->component = 'local_eledia_webservicesuite'; // Full name of the plugin (used for diagnostics).
-$plugin->maturity = MATURITY_STABLE;
+namespace local_eledia_webservicesuite\privacy;
+defined('MOODLE_INTERNAL') || die();
+
+/**
+ * Privacy provider for auth_eledia_webservicesuite.
+ */
+
+class provider implements \core_privacy\local\metadata\null_provider {
+    /**
+     * Get the language string identifier with the component's language
+     * file to explain why this plugin stores no data.
+     *
+     * @return  string
+     */
+    public static function get_reason() : string {
+        return 'privacy:metadata';
+    }
+}

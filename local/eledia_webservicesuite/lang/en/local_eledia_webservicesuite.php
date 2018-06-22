@@ -43,6 +43,7 @@ $string['idnumberuser'] = 'User ID number';
 $string['missing_token'] = 'Webservice token in plugin config is missing.';
 
 $string['pluginname'] = 'eledia webservicesuite';
+$string['privacy:metadata'] = 'The eledia webservicesuite plugin does not store any personal data.';
 
 $string['start'] = 'call function';
 $string['service_choose'] = 'chose the function';
