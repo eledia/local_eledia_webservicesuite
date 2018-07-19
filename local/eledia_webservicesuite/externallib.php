@@ -2098,7 +2098,6 @@ class eledia_services extends external_api {
                     )
                 )
             )
-
         );
     }
 
@@ -2298,14 +2297,14 @@ class eledia_services extends external_api {
     /**
      * Returns grades list.
      *
-     * @param array $params array 
-     * @return array 
+     * @param array $params array
+     * @return array
      */
     public static function get_scorm_report($params) {
         global $DB;
 
         self::validate_parameters(self::get_scorm_report_parameters(), $params);
-        
+
         $output = array();
 
         // Get user by username.
@@ -2316,8 +2315,8 @@ class eledia_services extends external_api {
             $output['success'] = false;
             $output['report'] = array();
             return array($output);
-        }        
-        
+        }
+
         // Get scrom tracking.
         try {
             $data = $DB->get_records('scorm_scoes_track', array('userid' => $user->id,
@@ -2328,9 +2327,9 @@ class eledia_services extends external_api {
             $output['report'] = array();
             return array($output);
         }
-        
+
         // Build up report.
-        $report = array();        
+        $report = array();
         foreach ($data as $value) {
             //Create new attempt entry.
             if (empty($report[$value->attempt])) {
@@ -2338,8 +2337,9 @@ class eledia_services extends external_api {
                 $report[$value->attempt]->last_access = 0;
                 $report[$value->attempt]->grade = 0;
                 $report[$value->attempt]->attempt = $value->attempt;
+                $report[$value->attempt]->status = '';
             }
-            
+
             // Set timestart.
             if ($value->element == 'x.start.time') {
                 if (empty($report[$value->attempt]->started)) {
@@ -2349,12 +2349,12 @@ class eledia_services extends external_api {
                     $report[$value->attempt]->started = $value->value;
                 }
             }
-            
+
             // Set grade.
             if ($value->element == 'cmi.core.score.raw') {
-                $report[$value->attempt]->grade = $value->value;               
+                $report[$value->attempt]->grade = $value->value;
             }
-            
+
             // Set last_access.
             if (empty($report->last_access)) {
                 $report[$value->attempt]->last_access = $value->timemodified;
@@ -2362,10 +2362,10 @@ class eledia_services extends external_api {
             if ($value->timemodified > $report[$value->scoid]->last_access) {
                 $report[$value->attempt]->last_access = $value->timemodified;
             }
-            
+
             // Set status.
             if ($value->element == 'cmi.core.lesson_status') {
-                $report[$value->attempt]->status = $value->value;               
+                $report[$value->attempt]->status = $value->value;
             }
         }
 
